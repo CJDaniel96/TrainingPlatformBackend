@@ -1,2 +1,5 @@
+*.py[cod]
+
 app/models/*
 app/yolov5/*
+data/datasets
