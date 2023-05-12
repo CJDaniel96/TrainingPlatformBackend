@@ -24,7 +24,7 @@ class CVATService:
     @classmethod
     def get_task_name(cls, lines, group_type, serial_number):
         line_name = ''
-        for line in eval(lines):
+        for line in lines:
             line_name += line
 
         return group_type + '_' + line_name + '_' + serial_number
