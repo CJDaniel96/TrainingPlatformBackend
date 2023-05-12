@@ -87,7 +87,6 @@ class YOLOInference:
                 xml_object.appendChild(name)
                 # bndbox
                 bndbox = doc.createElement('bndbox')
-                print("box_list" , box_list)
                 # xmin
                 xmin = doc.createElement('xmin')
                 xmin_text = doc.createTextNode(str(int(box_list[0])))
