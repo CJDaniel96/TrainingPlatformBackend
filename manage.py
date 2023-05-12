@@ -11,8 +11,6 @@ def checkenv():
 
 def runserver():
     Logger.info('Training Platform serving...')
-    # Check Enviroment
-    CheckEnvironmentController.check_datasets_environment()
 
     while True:
         app_run()

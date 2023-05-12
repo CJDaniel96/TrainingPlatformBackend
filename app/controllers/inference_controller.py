@@ -20,7 +20,7 @@ class YOLOInferenceController(InferenceController):
     @classmethod
     def inference(cls, data, project):
         org_data_folder = os.path.dirname(data)
-        model_file = YOLOInference.get_model_path(project)
+        model_file = YOLOInference.get_inference_model_path(project)
         model = YOLOInference.load_model(model_file)
         xml_folder = YOLOInference.check_folder(os.path.join(org_data_folder, 'xml'))
 
