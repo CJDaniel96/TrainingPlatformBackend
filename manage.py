@@ -4,6 +4,11 @@ from app.main import app_run
 from app.services.logging_service import Logger
 
 
+def checkenv():
+    Logger.info('Check Datasets Environment')
+    # Check Enviroment
+    CheckEnvironmentController.check_datasets_environment()
+
 def runserver():
     Logger.info('Training Platform serving...')
     # Check Enviroment
@@ -14,7 +19,7 @@ def runserver():
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', choices=['runserver'], help='the command to run')
+    parser.add_argument('command', choices=['runserver', 'checkenv'], help='the command to run')
     opt = parser.parse_args()
 
     return opt
@@ -23,3 +28,5 @@ if __name__ == '__main__':
     opt = parse_opt()
     if opt.command == 'runserver':
         runserver()
+    elif opt.command == 'checkenv':
+        checkenv()

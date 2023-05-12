@@ -42,6 +42,11 @@ TRAINING_PLATFORM_RECORD_STATUS = {
     'FINISHED': 'Finished'
 }
 
+TRAINING_STATUS = {
+    'RUNNING': 'Running',
+    'DONE': 'Done'
+}
+
 PROJECTS = [
     'NK_DAOI_CHIPRC', 
     'NK_DAOI_CHIPRC_2',
@@ -50,9 +55,13 @@ PROJECTS = [
 
 # Model Folder Path
 
-INFERENCE_MODEL_DIR = './app/models/inference'
+MOBILENET_TRAIN_MODEL_DIR = './app/models/mobilenet_train'
+
+YOLO_INFERENCE_MODEL_DIR = './app/models/yolo_inference'
 
 YOLO_TRAIN_MODEL_DIR = './app/models/yolo_train'
+
+GAN_INFERENCE_MODEL_DIR = './app/models/gan_inference'
 
 # CVAT Settings
 
@@ -70,6 +79,8 @@ CVAT_TASKS_STATUS_API = '/api/tasks/{}/status'
 
 CVAT_TASKS_ANNOTATION_API = '/api/tasks/{}/annotations'
 
+CVAT_TASKS_DATASET_API = '/api/tasks/{}/dataset'
+
 CVAT_LOGIN_INFORMATION = {
     'username': 'admin',
     'password': '!QAZ2wsx3edc',
@@ -77,6 +88,21 @@ CVAT_LOGIN_INFORMATION = {
 
 CVAT_ANNOTATION_FORMAT = 'PASCAL VOC 1.1'
 
+CVAT_DOWNLOAD_FORMAT = 'YOLO 1.1'
+
 CVAT_UPLOAD_INFORMATION = {'image_quality': 70}
 
+# YOLOv5 Settings
+
 YOLOV5_DIR = 'app/yolov5'
+
+BATCH_SIZE = 8
+
+EPOCHS = 300
+
+# Training Flow Settings
+
+TRAINING_FLOW = {
+    'NK_DAOI_CHIPRC_2': ['object_detection'],
+    'NK_PCIE_2': ['object_detection']
+}

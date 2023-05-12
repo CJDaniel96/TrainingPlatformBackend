@@ -1,8 +1,11 @@
 from datetime import timedelta
+import json
+import os
 import random
 from app.config import IRI_RECORD_STATUS, URD_RECORD_STATUS
+from app.services.logging_service import Logger
 from data.config import DATABASES
-from data.database.ai import ImagePool, IriRecord, UrdRecord
+from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CriticalNg, ImagePool, IriRecord, ODTrainingInfo, UrdRecord
 from data.database.amr_nifi_test import AmrRawData
 from data.database.sessions import create_session
 
@@ -68,6 +71,15 @@ class IRIRecord:
             })
             session.commit()
 
+    @classmethod
+    def get_tasks(cls, tasks_id):
+        with create_session(AI) as session:
+            data = session.query(IriRecord).filter(
+                IriRecord.task_id.in_(tasks_id)
+            ).all()
+        
+        return [[obj.task_id, obj.task] for obj in data]
+
 
 class URDRecord:
     @classmethod
@@ -125,6 +137,15 @@ class URDRecord:
             })
             session.commit()
 
+    @classmethod
+    def get_tasks(cls, tasks_id):
+        with create_session(AI) as session:
+            data = session.query(UrdRecord).filter(
+                UrdRecord.task_id.in_(tasks_id)
+            ).all()
+        
+        return [[obj.task_id, obj.task] for obj in data]
+
 
 class ImagePoolDatabase:
     def smart_filter_images(self, images):
@@ -159,6 +180,7 @@ class ImageData(ImagePoolDatabase):
 
     @classmethod
     def get_images(cls, site, line, group_type, start_date, end_date, smart_filter=False, is_covered=True, ai_result='0'):
+        Logger.info('Get Images UUID from query data')
         images = {}
         with create_session(AMR_NIFI_TEST) as session:
             end_date += timedelta(days=1)
@@ -186,6 +208,7 @@ class UploadData(ImagePoolDatabase):
 
     @classmethod
     def get_images(self, uuids):
+        Logger.info('Get Images UUID from upload data')
         images = {}
         with create_session(AMR_NIFI_TEST) as session:
             data = session.query(AmrRawData).filter(AmrRawData.uuid.in_(eval(uuids))).all()
@@ -204,6 +227,7 @@ class UploadImageData(ImagePoolDatabase):
 
     @classmethod
     def get_images(self, uuids):
+        Logger.info('Get Images UUID from upload images data')
         images = {}
         with create_session(AI) as session:
             data = session.query(UploadData).filter(UploadData.uuid.in_(eval(uuids))).all()
@@ -214,3 +238,156 @@ class UploadImageData(ImagePoolDatabase):
                     images[obj.line_id].append(obj.image_path)
 
             return images
+        
+
+class TrainingInfo:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def get_object_detection_tasks_id(cls, task_id, comp_type, val_status='APPROVE'):
+        with create_session(AI) as session:
+            data = session.query(ODTrainingInfo).filter(
+                ODTrainingInfo.task_id < task_id,
+                ODTrainingInfo.comp_type == comp_type,
+                ODTrainingInfo.val_status == val_status
+            ).all()
+
+        return [obj.task_id for obj in data]
+        
+    @classmethod
+    def get_classification_tasks_id(cls, task_id, comp_type, val_status='APPROVE'):
+        with create_session(AI) as session:
+            data = session.query(CLSTrainingInfo).filter(
+                CLSTrainingInfo.task_id < task_id,
+                CLSTrainingInfo.comp_type == comp_type,
+                CLSTrainingInfo.val_status == val_status
+            ).all()
+
+        return [obj.task_id for obj in data]
+    
+    @classmethod
+    def get_object_detection_model_version(cls, comp_type, val_status):
+        with create_session(AI) as session:
+            data =  session.query(ODTrainingInfo).filter(
+                ODTrainingInfo.comp_type == comp_type,
+                ODTrainingInfo.val_status == val_status
+            ).order_by(ODTrainingInfo.model_version.desc()).first()
+
+            return data.model_version
+        
+    @classmethod
+    def insert_object_detection_result(cls, task_id, comp_type, val_status, model_version): 
+        with create_session(AI) as session:
+            session.add(ODTrainingInfo(
+                task_id=task_id,
+                comp_type=comp_type,
+                val_status=val_status,
+                model_version=model_version
+            ))
+            session.commit()
+
+
+class AIModelInformation:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def insert_train_dataset_inference_task_id(cls, train_dataset_inference_task_id):
+        with create_session(AI) as session:
+            ...
+
+class CategoryMapping:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def get_class_names(cls, site, group_type, project):
+        with create_session(AI) as session:
+            data = session.query(CategoryMapping.labels).filter(
+                CategoryMapping.site == site,
+                CategoryMapping.group_type == group_type,
+                CategoryMapping.project == project
+            ).first()
+
+        labels = data.labels
+
+        return labels.keys()
+    
+
+class CropCategorizingRecord:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def update_underkill_image(cls, finetune_id, image_id, image_hight, image_wide, finetune_type, categorizing_code='OK', crop_name='ORG', critical_ng=True):
+        with create_session(AI) as session:
+            session.add(CropCategorizingRecord(
+                finetune_id=finetune_id, 
+                img_id=image_id, 
+                crop_name=crop_name,
+                x_min=0,
+                y_min=0,
+                x_max=image_wide,
+                y_max=image_hight,
+                categorizing_code=categorizing_code,
+                finetune_type=finetune_type,
+                critical_ng=critical_ng
+            ))
+            session.commit()
+
+        return finetune_type + '@' + str(finetune_id) + '@' + image_id + '@' + crop_name
+
+
+class CriticalNG:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def get_image_uuid(cls, image, group_type, crop_name='ORG'):
+        image_path = f'{group_type}/{crop_name}/{image}'
+        with create_session(AI) as session:
+            data = session.query(CriticalNg.img_id).filter(CriticalNg.image_path == image_path).first()
+
+        return data.img_id
+    
+
+class AIModelInformation:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def update(cls, group_type, model_path, ip_address, finetune_id, finetune_type, verified_status, crop_name='ORG'):
+        with create_session(AI) as session:
+            session.add(AiModelInfo(
+            model_type=group_type,
+            model_name=crop_name,
+            model_path=f'{ip_address}//{model_path}',
+            verified_status=verified_status,
+            finetune_id=finetune_id,
+            finetune_type=finetune_type
+        ))
+        session.commit()
+
+    @classmethod
+    def get_model_id(cls):
+        with create_session(AI) as session:
+            data = session.query(AiModelInfo.model_id).order_by(AiModelInfo.model_id.desc).first()
+
+            return data.model_id
+        
+
+class AIModelPerformance:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def update(cls, model_id, metrics_result, false_negative_images, false_positive_images):
+        with create_session(AI) as session:
+            session.add(AiModelPerf(
+                model_id=model_id,
+                metrics_result=json.dumps(metrics_result),
+                false_negative_imgs=json.dumps(false_negative_images),
+                false_positive_imgs=json.dumps(false_positive_images)
+            ))
+            session.commit()

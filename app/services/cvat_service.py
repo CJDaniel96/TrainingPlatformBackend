@@ -1,7 +1,9 @@
 import os
 from urllib.parse import urljoin
-from app.config import CVAT_ANNOTATION_FORMAT, CVAT_LOGIN_API, CVAT_LOGIN_INFORMATION, CVAT_LOGOUT_API, CVAT_TASKS_ANNOTATION_API, CVAT_TASKS_DATA_API, CVAT_TASKS_STATUS_API, CVAT_UPLOAD_INFORMATION, CVAT_URL, CVAT_TASKS_API
+from app.config import CVAT_ANNOTATION_FORMAT, CVAT_DOWNLOAD_FORMAT, CVAT_LOGIN_API, CVAT_LOGIN_INFORMATION, CVAT_LOGOUT_API, CVAT_TASKS_ANNOTATION_API, CVAT_TASKS_DATA_API, CVAT_TASKS_DATASET_API, CVAT_TASKS_STATUS_API, CVAT_UPLOAD_INFORMATION, CVAT_URL, CVAT_TASKS_API
 import requests
+
+from data.config import TMP_DIR
 
 
 class CVATService:
@@ -80,3 +82,20 @@ class CVATService:
             response.raise_for_status()
             if response.status_code == 201:
                 return
+
+    @classmethod
+    def task_download(cls, task_id, task_name, auth_header):
+        download_url = urljoin(CVAT_URL, CVAT_TASKS_DATASET_API).format(task_id)
+        parameters = {
+            'action': 'download', 
+            'format': CVAT_DOWNLOAD_FORMAT,
+            'filename': task_name
+        }
+        while True:
+            response = requests.get(download_url, headers=auth_header, params=parameters)
+            response.raise_for_status()
+            if len(response.content) != 0:
+                zip_file = os.path.join(TMP_DIR, task_name + '.zip')
+                with open(zip_file, 'wb') as f:
+                    f.write(response.content)
+                return zip_file

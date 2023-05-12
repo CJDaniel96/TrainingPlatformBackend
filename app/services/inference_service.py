@@ -1,5 +1,6 @@
+import shutil
 from app.services.model_service import Discriminator, Encoder, Generator
-from app.config import INFERENCE_MODEL_DIR, YOLOV5_DIR
+from app.config import GAN_INFERENCE_MODEL_DIR, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR, YOLOV5_DIR
 from xml.dom.minidom import Document
 from glob import glob
 from torchvision import transforms
@@ -11,16 +12,18 @@ import torch.nn as nn
 import cv2
 import numpy as np
 
+from data.config import OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR
+
 
 class YOLOInference:
     @classmethod
     def get_config(cls, project, config_name='config.ini'):
-        config_file = os.path.join(INFERENCE_MODEL_DIR, project, config_name)
+        config_file = os.path.join(YOLO_INFERENCE_MODEL_DIR, project, config_name)
         if os.path.exists(config_file):
             return config_file
         else:
             config_name = '*.ini'
-            config_files = glob(os.path.join(INFERENCE_MODEL_DIR, project, config_name))
+            config_files = glob(os.path.join(YOLO_INFERENCE_MODEL_DIR, project, config_name))
             if len(config_files) == 1:
                 return config_files[0]
             elif len(config_files) > 1:
@@ -112,12 +115,16 @@ class YOLOInference:
             doc.writexml(xml, indent='\t', newl='\n', addindent='\t', encoding='utf-8')
 
     @classmethod
-    def get_model_path(cls, project, model_name='yolo_model.pt'):
-        model_files = os.path.join(INFERENCE_MODEL_DIR, project, model_name)
-        if not os.path.exists(model_files):
+    def get_inference_model_path(cls, project, model_name='yolo_model.pt'):
+        model_file = os.path.join(YOLO_INFERENCE_MODEL_DIR, project, model_name)
+        if not os.path.exists(model_file):
             raise Exception('No model file or model file name is not project name (e.x. yolo_model.pt)!')
         else:
-            return model_files
+            return model_file
+        
+    @classmethod
+    def get_train_model_path(cls, project, task_name):
+        return os.path.join(YOLO_TRAIN_MODEL_DIR, project, task_name, 'weights', 'best.pt')
 
     @property
     def device(self):
@@ -131,6 +138,14 @@ class YOLOInference:
         return model
     
     @classmethod
+    def get_validation_images(cls, project):
+        return glob(os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project, '**', '*.jpg'), recursive=True)
+    
+    @classmethod
+    def get_train_images(cls, train_data_folder):
+        return glob(os.path.join(train_data_folder, '**', '*.jpg'), recursive=True)
+
+    @classmethod
     def predict(cls, model, image_path):
         return model(image_path).pandas().xyxy[0]
     
@@ -138,10 +153,61 @@ class YOLOInference:
     def read_image(cls, image_path):
         return cv2.imread(image_path)
 
+    @classmethod
+    def get_image_name(cls, image_path):
+        return os.path.basename(image_path)
+
+    @classmethod
+    def get_image_size(cls, image):
+        return image.shape
+    
+    @classmethod
+    def get_class_names(cls, result):
+        return list(result['name'].values)
+    
+    @classmethod
+    def get_label_positions(cls, result):
+        return list(result[['xmin', 'ymin', 'xmax', 'ymax']].values)
+    
+    @classmethod
+    def save_inference_image(cls, image_path, project, task_name):
+        image_name = os.path.basename(image_path)
+        dst_folder = os.path.join(OBJECT_DETECTION_INFERENCE_DATASETS_DIR, project, task_name, 'images')
+        cls().check_folder(dst_folder)
+        shutil.copyfile(image_path, os.path.join(dst_folder, image_name))
+
+        return dst_folder
+    
+    @classmethod
+    def get_inference_folder(cls, project, task_name):
+        dst_folder = os.path.join(OBJECT_DETECTION_INFERENCE_DATASETS_DIR, project, task_name)
+        cls().check_folder(dst_folder)
+        
+        return dst_folder
+
+    @classmethod
+    def get_inference_xml_folder(cls, project, task_name):
+        dst_folder = os.path.join(OBJECT_DETECTION_INFERENCE_DATASETS_DIR, project, task_name, 'xmls')
+        cls().check_folder(dst_folder)
+
+        return dst_folder
+
 
 class CHIPRCInference(YOLOInference):
     def __init__(self) -> None:
         super().__init__()
+
+    @classmethod
+    def get_generator_model_path(cls, project):
+        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'generator')
+
+    @classmethod
+    def get_discriminator_model_path(cls, project):
+        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'discriminator')
+    
+    @classmethod
+    def get_encoder_model_path(cls, project):
+        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'encoder')
 
     @classmethod
     def get_generator_model(cls, path, img_size=256, latent_dim=100, channels=3):
@@ -186,7 +252,28 @@ class CHIPRCInference(YOLOInference):
         return transforms.Compose(pipeline)
     
     @classmethod
-    def vae_predict(cls, image, chiprcs, transform, generator, discriminator, encoder, criterion, kappa=1.0):
+    def yolo_predict(cls, model, image_path, chiprc_threshold=0.5, target='ChipRC'):
+        result = model(image_path).pandas().xyxy[0]
+        class_names = result['name'].unique()
+        chiprcs = result[result['name'] == target]
+        lcl_chiprc = list(filter(lambda x: x < chiprc_threshold ,list(result[result['name']=='ChipRC']['confidence'])))
+        chiprc_count = 0
+
+        if target in class_names:
+            chiprc_count = result['name'].value_counts()[target]
+
+        if target not in class_names or len(class_names) > 1:   
+            return False, chiprcs   
+        elif type(chiprc_count) == np.int64 and chiprc_count > 1:
+            return False, chiprcs
+        elif len(lcl_chiprc) > 0:
+            return False, chiprcs
+        else:
+            return True, chiprcs
+    
+    @classmethod
+    def vae_predict(cls, image_path, chiprcs, transform, generator, discriminator, encoder, criterion, kappa=1.0):
+        image = cv2.imread(image_path)
         for i in range(chiprcs.shape[0]):
             chiprc = chiprcs.iloc[i:i+1, :]
             xmin = list(chiprc['xmin'])[0]
@@ -209,20 +296,26 @@ class CHIPRCInference(YOLOInference):
             )
 
             for img in test_dataloader:
-                    real_img = img.to(cls().device())
+                real_img = img.to(cls().device())
 
-                    real_z = encoder(real_img)
-                    fake_img = generator(real_z)
+                real_z = encoder(real_img)
+                fake_img = generator(real_z)
 
-                    real_feature = discriminator.forward_features(real_img)
-                    fake_feature = discriminator.forward_features(fake_img)
+                real_feature = discriminator.forward_features(real_img)
+                fake_feature = discriminator.forward_features(fake_img)
 
-                    img_distance = criterion(fake_img, real_img)
-                    loss_feature = criterion(fake_feature, real_feature)
-                    anomaly_score = img_distance + kappa * loss_feature
-                    anomaly_score = float(anomaly_score)
+                img_distance = criterion(fake_img, real_img)
+                loss_feature = criterion(fake_feature, real_feature)
+                anomaly_score = img_distance + kappa * loss_feature
+                anomaly_score = float(anomaly_score)
 
-                    if anomaly_score>0.2:
-                        return 'NG'
-                    else:
-                        return 'OK'
+                if anomaly_score > 0.2:
+                    return False
+                else:
+                    return True
+                
+    @classmethod
+    def output_underkill_image(cls, image_path, project, task_name):
+        image_name = os.path.basename(image_path)
+        dst_path = os.path.join(OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, project, task_name, image_name)
+        shutil.copyfile(image_path, dst_path)

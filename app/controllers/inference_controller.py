@@ -46,6 +46,29 @@ class YOLOInferenceController(InferenceController):
             )
 
         return xml_folder
+    
+    @classmethod
+    def get_train_model_path(cls, project, task_name):
+        return YOLOInference.get_train_model_path(project, task_name)
+
+    @classmethod
+    def train_dataset_inference(cls, project, task_name, model_file, train_data_folder):
+        model = YOLOInference.load_model(model_file)
+        images = YOLOInference.get_train_images(train_data_folder)
+
+        for image_path in images:
+            result = YOLOInference.predict(model, image_path)
+            image_name = YOLOInference.get_image_name(image_path)
+            image = YOLOInference.read_image(image_path)
+            image_size = YOLOInference.get_image_size(image)
+            class_names = YOLOInference.get_class_names(result)
+            label_positions = YOLOInference.get_label_positions(result)
+
+            inference_image_folder = YOLOInference.save_inference_image(image_path, project, task_name)
+            inferece_xml_folder = YOLOInference.get_inference_xml_folder(project, task_name)
+            YOLOInference.output_xml(image_size, image_name, class_names, label_positions, inferece_xml_folder)
+
+        return inference_image_folder, inferece_xml_folder
 
 
 class CHIPRCInferenceController(InferenceController):
