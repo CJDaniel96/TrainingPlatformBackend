@@ -12,6 +12,10 @@ class CheckEnvironmentController:
         CheckDatasetsEnvironment.check_classification_train_datasets_path()
         CheckDatasetsEnvironment.check_object_detection_validation_datasets_path()
         CheckDatasetsEnvironment.check_classification_validation_datasets_path()
+        CheckDatasetsEnvironment.check_object_detection_inference_datasets_path()
+        CheckDatasetsEnvironment.check_classification_inference_datasets_path()
+        CheckDatasetsEnvironment.check_object_detection_underkill_datasets_path()
+        CheckDatasetsEnvironment.check_classification_underkill_datasets_path()
         CheckDatasetsEnvironment.check_yolo_train_yamls_path()
 
     @classmethod
