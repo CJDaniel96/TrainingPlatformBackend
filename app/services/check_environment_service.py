@@ -2,7 +2,7 @@ import os
 import shutil
 from app.config import GAN_INFERENCE_MODEL_DIR, MOBILENET_TRAIN_MODEL_DIR, PROJECTS, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR
 from app.services.logging_service import Logger
-from data.config import CLASSIFICATION_BASICLINE_DATASETS_DIR, CLASSIFICATION_INFERENCE_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, ORIGIN_DATASETS_DIR, OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, CLASSIFICATION_TRAIN_DATASETS_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR
+from data.config import CLASSIFICATION_BASICLINE_DATASETS_DIR, CLASSIFICATION_INFERENCE_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR, ORIGIN_DATASETS_DIR, OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, CLASSIFICATION_TRAIN_DATASETS_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR
 
 
 class CheckDatasetsEnvironment:
@@ -55,7 +55,7 @@ class CheckDatasetsEnvironment:
     def check_object_detection_validation_datasets_path(cls):
         Logger.info('Check Object Detection Validation Datasets Path')
         for project in PROJECTS:
-            folder = os.path.join(OBJECT_DETECTION_TRAIN_DATASETS_DIR, project)
+            folder = os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project)
             if not os.path.exists(folder):
                 Logger.info(f'Create {project} Object Detection Validation Datasets Path')
                 os.makedirs(folder)
@@ -64,7 +64,7 @@ class CheckDatasetsEnvironment:
     def check_classification_validation_datasets_path(cls):
         Logger.info('Check Classification Validation Datasets Path')
         for project in PROJECTS:
-            folder = os.path.join(CLASSIFICATION_TRAIN_DATASETS_DIR, project)
+            folder = os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project)
             if not os.path.exists(folder):
                 Logger.info(f'Create {project} Classification Validation Datasets Path')
                 os.makedirs(folder)
