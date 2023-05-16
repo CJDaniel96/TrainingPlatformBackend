@@ -11,6 +11,7 @@ class ClassificationController:
 
     @classmethod
     def check_coutinue_train_classification_model(cls, project):
+        Logger.info('Check Whether Train Classification Model')
         if 'classification' in TRAINING_FLOW[project]:
             return True
         else:
@@ -34,7 +35,8 @@ class ClassificationController:
 
         
     @classmethod
-    def upload_upload_crop_categorizing(cls, images, group_type, record_id, finetune_type):
+    def upload_crop_categorizing(cls, images, group_type, record_id, finetune_type):
+        Logger.info('Upload Database Record Crop Categorizing')
         crop_image_ids = []
         for image_path in images:
             image_uuid = CriticalNG.get_image_uuid(image_path, group_type)
@@ -47,6 +49,7 @@ class ClassificationController:
 
     @classmethod
     def upload_ai_model_information(cls, model_path, record_id, finetune_type, group_type, model_validate_result): 
+        Logger.info('Upload Database Record AI Model Information')
         ip_address = UnderkillDataProcessing.get_ip_address()
         if model_validate_result:
             verified_status = 'APPROVE'
@@ -60,6 +63,7 @@ class ClassificationController:
 
     @classmethod
     def upload_ai_model_performance(cls, model_id, underkills, model_path, crop_image_ids, training_datasets_inferece_task_id):
+        Logger.info('Upload Database Record AI Model Performance')
         if 'best.pt' in model_path:
             loss = UnderkillDataProcessing.get_loss(model_path)
             accuracy = UnderkillDataProcessing.get_accuracy(underkills)

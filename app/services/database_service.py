@@ -2,6 +2,7 @@ from datetime import timedelta
 import json
 import os
 import random
+import uuid
 from app.config import IRI_RECORD_STATUS, URD_RECORD_STATUS
 from app.services.logging_service import Logger
 from data.config import DATABASES
@@ -350,7 +351,24 @@ class CriticalNG:
             data = session.query(CriticalNg.img_id).filter(CriticalNg.image_path == image_path).first()
 
         return data.img_id
+
+    @classmethod
+    def insert_new_images(cls, group_type, image_path, crop_name='ORG'):
+        image_path = f'{group_type}/{crop_name}/{os.path.basename(image_path)}'
+        with create_session(AI) as session:
+            session.add(CriticalNg(
+                img_id=uuid.uuid4(), 
+                image_path=image_path, 
+                group_type=group_type
+            ))
+            session.commit()
     
+    @classmethod
+    def delete_images_by_group_type(cls, group_type):
+        with create_session(AI) as session:
+            session.query(CriticalNg).filter(CriticalNg.group_type == group_type).delete()
+            session.commit()
+
 
 class AIModelInformation:
     def __init__(self) -> None:

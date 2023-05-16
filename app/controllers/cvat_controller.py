@@ -1,6 +1,7 @@
 import time
 from app.services.cvat_service import CVATService
 from app.services.datasets_service import OriginDataProcessing
+from app.services.logging_service import Logger
 
 
 class CVATController:
@@ -33,6 +34,7 @@ class CVATController:
 
     @classmethod
     def upload(cls, images_folder, xml_folder, project_id, task_name, token):
+        Logger.info('Upload Data To CVAT')
         auth_header = CVATService.get_auth_header(token)
         task_create_information = CVATService.get_task_create_infomation(task_name, project_id)
         task_id = CVATService.create_task(auth_header, task_create_information)
@@ -45,6 +47,7 @@ class CVATController:
 
     @classmethod
     def download(cls, task_id, task_name, token):
+        Logger.info('Download Data From CVAT')
         auth_header = CVATService.get_auth_header(token)
         task_zip_file = CVATService.task_download(task_id, task_name, auth_header)
 

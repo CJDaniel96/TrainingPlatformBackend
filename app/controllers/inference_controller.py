@@ -1,8 +1,9 @@
 from app.services.inference_service import YOLOInference
 from glob import glob
-import shutil
 import os
 import numpy as np
+
+from app.services.logging_service import Logger
 
 
 class InferenceController:
@@ -19,6 +20,7 @@ class YOLOInferenceController(InferenceController):
 
     @classmethod
     def inference(cls, data, project):
+        Logger.info('YOLO Inference')
         org_data_folder = os.path.dirname(data)
         model_file = YOLOInference.get_inference_model_path(project)
         model = YOLOInference.load_model(model_file)
@@ -53,6 +55,7 @@ class YOLOInferenceController(InferenceController):
 
     @classmethod
     def train_dataset_inference(cls, project, task_name, model_file, train_data_folder):
+        Logger.info('YOLO Inference for Train Dataset')
         model = YOLOInference.load_model(model_file)
         images = YOLOInference.get_train_images(train_data_folder)
 

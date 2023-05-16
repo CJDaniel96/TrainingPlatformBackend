@@ -1,6 +1,7 @@
 from app.services.database_service import CategoryMapping, IRIRecord, TrainingInfo, URDRecord
 from app.services.datasets_service import ObjectDetectionTrainDataProcessing
 from app.services.inference_service import CHIPRCInference, YOLOInference
+from app.services.logging_service import Logger
 from app.services.train_service import YOLOTrain
 
 
@@ -27,6 +28,7 @@ class ObjectDetectionController:
         
     @classmethod
     def merge_basicline_dataset(cls, train_data_folder, project):
+        Logger.info('Merge Local Basicline Dataset in Train Dataset')
         ObjectDetectionTrainDataProcessing.merge_object_detection_basicline_data(train_data_folder, project)
 
     @classmethod
@@ -44,6 +46,7 @@ class ObjectDetectionController:
     
     @classmethod
     def train(cls, project, task_name, data, cfg):
+        Logger.info('YOLO Training Start...')
         if project == 'NK_DAOI_CHIPRC_2':
             hyp = cls().get_hyps_yaml(project)
             YOLOTrain.train_model(project, task_name, data, cfg, hyp)
@@ -52,6 +55,7 @@ class ObjectDetectionController:
 
     @classmethod
     def validate(cls, project, task_name):
+        Logger.info('YOLO Validating Start...')
         final_answer=True
         if project == 'NK_DAOI_CHIPRC_2':
             model_file = CHIPRCInference.get_train_model_path(project, task_name)

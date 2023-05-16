@@ -24,6 +24,7 @@ class Listener:
 
     @classmethod
     def update_record_status(cls, tablename, id, status):
+        Logger.info('Update Database Record Status')
         if tablename == 'iri_record':
             IRIRecord.update_status(id, status)
         elif tablename == 'urd_record':
@@ -31,6 +32,7 @@ class Listener:
 
     @classmethod
     def update_record_task_id(cls, tablename, id, task_id):
+        Logger.info('Update Database Record Task ID')
         if tablename == 'iri_record':
             IRIRecord.update_task_id(id, task_id)
         elif tablename == 'urd_record':
@@ -38,6 +40,7 @@ class Listener:
 
     @classmethod
     def update_record_task_name(cls, tablename, id, task_name):
+        Logger.info('Update Database Record Task Name')
         if tablename == 'iri_record':
             IRIRecord.update_task_name(id, task_name)
         elif tablename == 'urd_record':
@@ -45,6 +48,7 @@ class Listener:
 
     @classmethod
     def update_record_object_detection_training_status(cls, tablename, id, training_status):
+        Logger.info('Update Database Record Object Detection Training Status')
         if tablename == 'iri_record':
             IRIRecord.update_od_training_status(id, training_status)
         elif tablename == 'urd_record':
@@ -52,6 +56,7 @@ class Listener:
 
     @classmethod
     def update_record_object_detection_training_info(cls, result, task_id, comp_type):
+        Logger.info('Update Database Record Object Detection Training Information')
         if result:
             val_status = 'APPROVE'
         else:
