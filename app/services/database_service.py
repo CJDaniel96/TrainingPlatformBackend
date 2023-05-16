@@ -302,7 +302,7 @@ class CategoryMappingService:
                 CategoryMapping.project == project
             ).first()
 
-        labels = data.labels
+        labels = eval(data.labels)
 
         return labels.keys()
     
