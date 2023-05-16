@@ -162,7 +162,7 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
     @classmethod
     def merge_object_detection_basicline_data(cls, train_data_folder, project):
         basicline_dataset = os.path.join(OBJECT_DETECTION_BASICLINE_DATASETS_DIR, project)
-        train_images_folder = os.path.join(train_data_folder, 'images', 'train', 'images', 'train')
+        train_images_folder = os.path.join(train_data_folder, 'images', 'train')
         train_labels_folder = os.path.join(train_data_folder, 'labels', 'train')
 
         for image in glob(os.path.join(basicline_dataset, 'images', 'train', '*.jpg')):
