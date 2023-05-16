@@ -304,7 +304,7 @@ class CategoryMappingService:
 
         labels = eval(data.labels)
 
-        return labels.keys()
+        return list(labels.keys())
     
 
 class CropCategorizingRecordService:
