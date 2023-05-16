@@ -1,4 +1,4 @@
-from app.services.database_service import IRIRecord, ImageData, ImagePoolDatabase, URDRecord, UploadData, UploadImageData
+from app.services.database_service import IRIRecordService, ImageDataService, ImagePoolService, URDRecordService, UploadData, UploadImageDataService
 from app.services.datasets_service import OriginDataProcessing
 from app.services.image_pool_service import ImagePool
 
@@ -16,23 +16,23 @@ class InitialController:
         self.tablename = record.__tablename__
 
     def get_query_data(self):
-        return ImageData.get_images(self.site, self.line, self.group_type, self.start_date, self.end_date, self.smart_filter)
+        return ImageDataService.get_images(self.site, self.line, self.group_type, self.start_date, self.end_date, self.smart_filter)
 
     def get_upload_data(self):
         return UploadData.get_images(self.uuids)
 
     def get_upload_image_data(self):
-        return UploadImageData.get_images(self.uuids)
+        return UploadImageDataService.get_images(self.uuids)
     
     def update_record_line(self, lines):
         if self.tablename == 'iri_record':
-            IRIRecord.update_line(id, lines)
+            IRIRecordService.update_line(id, lines)
         elif self.tablename == 'urd_record':
-            URDRecord.update_line(id, lines)
+            URDRecordService.update_line(id, lines)
 
     @classmethod
     def download_images(cls, images: dict):
-        image_pools = ImagePoolDatabase.get_image_pool()
+        image_pools = ImagePoolService.get_image_pool()
         for image_pool in image_pools:
             if image_pool.line in images.keys():
                 image_list = images[image_pool.line]

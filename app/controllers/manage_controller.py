@@ -1,4 +1,4 @@
-from app.services.database_service import CriticalNG
+from app.services.database_service import CriticalNGService
 from app.services.inference_service import YOLOInference
 from app.services.manage_service import ManageService
 
@@ -13,4 +13,4 @@ class ManageController:
         for image in validated_images:
             ManageService.check_image_type(image)
             ManageService.parse_chinses_to_english(image)
-            CriticalNG.insert_new_images(group_type, image)
+            CriticalNGService.insert_new_images(group_type, image)

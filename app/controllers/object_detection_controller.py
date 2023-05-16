@@ -1,4 +1,4 @@
-from app.services.database_service import CategoryMapping, IRIRecord, TrainingInfo, URDRecord
+from app.services.database_service import CategoryMappingService, IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.datasets_service import ObjectDetectionTrainDataProcessing
 from app.services.inference_service import CHIPRCInference, YOLOInference
 from app.services.logging_service import Logger
@@ -8,11 +8,11 @@ from app.services.train_service import YOLOTrain
 class ObjectDetectionController:
     @classmethod
     def get_object_detection_tasks(cls, task_id, group_type, tablename):
-        tasks_id = TrainingInfo.get_object_detection_tasks_id(task_id, group_type)
+        tasks_id = TrainingInfoService.get_object_detection_tasks_id(task_id, group_type)
         if tablename == 'iri_record':
-            return IRIRecord.get_tasks(tasks_id)
+            return IRIRecordService.get_tasks(tasks_id)
         elif tablename == 'urd_record':
-            return URDRecord.get_tasks(tasks_id)
+            return URDRecordService.get_tasks(tasks_id)
 
     @classmethod
     def get_train_data_folder(cls, project, task_name):
@@ -33,7 +33,7 @@ class ObjectDetectionController:
 
     @classmethod
     def get_data_yaml(cls, site, group_type, project, train_data_folder):
-        class_names = CategoryMapping.get_class_names(site, group_type, project)
+        class_names = CategoryMappingService.get_class_names(site, group_type, project)
         return ObjectDetectionTrainDataProcessing.write_data_yaml(project, class_names, train_data_folder)
 
     @classmethod

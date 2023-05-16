@@ -6,7 +6,7 @@ import uuid
 from app.config import IRI_RECORD_STATUS, URD_RECORD_STATUS
 from app.services.logging_service import Logger
 from data.config import DATABASES
-from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CriticalNg, ImagePool, IriRecord, ODTrainingInfo, UrdRecord
+from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CategoryMapping, CriticalNg, CropCategorizingRecord, ImagePool, IriRecord, ODTrainingInfo, UploadData, UrdRecord
 from data.database.amr_nifi_test import AmrRawData
 from data.database.sessions import create_session
 
@@ -16,7 +16,7 @@ AMR_NIFI_TEST = DATABASES['amr_nifi_test']['NAME']
 CVAT = DATABASES['cvat']['NAME']
 
 
-class IRIRecord:
+class IRIRecordService:
     @classmethod
     def status(cls):
         with create_session(AI) as session:
@@ -82,7 +82,7 @@ class IRIRecord:
         return [[obj.task_id, obj.task] for obj in data]
 
 
-class URDRecord:
+class URDRecordService:
     @classmethod
     def status(cls):
         with create_session(AI) as session:
@@ -148,7 +148,7 @@ class URDRecord:
         return [[obj.task_id, obj.task] for obj in data]
 
 
-class ImagePoolDatabase:
+class ImagePoolService:
     def smart_filter_images(self, images):
         buffer = []
         dataset = {}
@@ -175,7 +175,7 @@ class ImagePoolDatabase:
             return session.query(ImagePool).all()
 
 
-class ImageData(ImagePoolDatabase):
+class ImageDataService(ImagePoolService):
     def __init__(self) -> None:
         super().__init__()
 
@@ -203,7 +203,7 @@ class ImageData(ImagePoolDatabase):
             return images
 
 
-class UploadData(ImagePoolDatabase):
+class UploadDataService(ImagePoolService):
     def __init__(self) -> None:
         super().__init__()
 
@@ -222,7 +222,7 @@ class UploadData(ImagePoolDatabase):
             return images
 
 
-class UploadImageData(ImagePoolDatabase):
+class UploadImageDataService(ImagePoolService):
     def __init__(self) -> None:
         super().__init__()
 
@@ -241,7 +241,7 @@ class UploadImageData(ImagePoolDatabase):
             return images
         
 
-class TrainingInfo:
+class TrainingInfoService:
     def __init__(self) -> None:
         pass
 
@@ -289,16 +289,7 @@ class TrainingInfo:
             session.commit()
 
 
-class AIModelInformation:
-    def __init__(self) -> None:
-        pass
-
-    @classmethod
-    def insert_train_dataset_inference_task_id(cls, train_dataset_inference_task_id):
-        with create_session(AI) as session:
-            ...
-
-class CategoryMapping:
+class CategoryMappingService:
     def __init__(self) -> None:
         pass
 
@@ -316,7 +307,7 @@ class CategoryMapping:
         return labels.keys()
     
 
-class CropCategorizingRecord:
+class CropCategorizingRecordService:
     def __init__(self) -> None:
         pass
 
@@ -340,7 +331,7 @@ class CropCategorizingRecord:
         return finetune_type + '@' + str(finetune_id) + '@' + image_id + '@' + crop_name
 
 
-class CriticalNG:
+class CriticalNGService:
     def __init__(self) -> None:
         pass
 
@@ -370,7 +361,7 @@ class CriticalNG:
             session.commit()
 
 
-class AIModelInformation:
+class AIModelInformationService:
     def __init__(self) -> None:
         pass
 
@@ -395,7 +386,7 @@ class AIModelInformation:
             return data.model_id
         
 
-class AIModelPerformance:
+class AIModelPerformanceService:
     def __init__(self) -> None:
         pass
 

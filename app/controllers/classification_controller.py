@@ -1,5 +1,5 @@
 from app.config import TRAINING_FLOW
-from app.services.database_service import AIModelInformation, AIModelPerformance, CriticalNG, CropCategorizingRecord
+from app.services.database_service import AIModelInformationService, AIModelPerformanceService, CriticalNGService, CropCategorizingRecordService
 from app.services.datasets_service import UnderkillDataProcessing
 from app.services.inference_service import YOLOInference
 from app.services.logging_service import Logger
@@ -39,10 +39,10 @@ class ClassificationController:
         Logger.info('Upload Database Record Crop Categorizing')
         crop_image_ids = []
         for image_path in images:
-            image_uuid = CriticalNG.get_image_uuid(image_path, group_type)
+            image_uuid = CriticalNGService.get_image_uuid(image_path, group_type)
             image = YOLOInference.read_image(image_path)
             image_size = YOLOInference.get_image_size(image)
-            crop_image_id = CropCategorizingRecord.update_underkill_image(record_id, image_uuid, image_size[0], image_size[1], finetune_type)
+            crop_image_id = CropCategorizingRecordService.update_underkill_image(record_id, image_uuid, image_size[0], image_size[1], finetune_type)
             crop_image_ids.append(crop_image_id)
 
         return crop_image_ids
@@ -55,8 +55,8 @@ class ClassificationController:
             verified_status = 'APPROVE'
         else:
             verified_status = 'FAIL'
-        AIModelInformation.update(group_type, model_path, ip_address, record_id, finetune_type, verified_status)
-        model_id = AIModelInformation.get_model_id()
+        AIModelInformationService.update(group_type, model_path, ip_address, record_id, finetune_type, verified_status)
+        model_id = AIModelInformationService.get_model_id()
         Logger.info(f'Model Path: {model_path}, Validate Result: {verified_status}')
 
         return model_id
@@ -72,5 +72,5 @@ class ClassificationController:
         false_negative_images = UnderkillDataProcessing.get_false_negative_images(crop_image_ids)
         false_positive_images = UnderkillDataProcessing.get_false_positive_images()
 
-        AIModelPerformance.update(model_id, metrics_result, false_negative_images, false_positive_images)
+        AIModelPerformanceService.update(model_id, metrics_result, false_negative_images, false_positive_images)
         
