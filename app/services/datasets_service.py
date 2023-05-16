@@ -182,8 +182,8 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
         with open(data_yaml_path, 'w') as f:
             f.writelines(f'names: {class_names}\n')
             f.writelines(f'nc: {len(class_names)}\n')
-            f.writelines(f'train: {train_images_data_path}\n')
-            f.writelines(f'val: {train_labels_data_path}\n')
+            f.writelines(f'train: {os.path.abspath(train_images_data_path)}\n')
+            f.writelines(f'val: {os.path.abspath(train_labels_data_path)}\n')
 
         return data_yaml_path
     
