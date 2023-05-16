@@ -87,7 +87,7 @@ def app_run():
         models_yaml = ObjectDetectionController.get_models_yaml(project)
 
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['TRAINING_FOR_OD'])
-        ObjectDetectionController.train(project, data_yaml, models_yaml)
+        ObjectDetectionController.train(project, task_name, data_yaml, models_yaml)
 
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['VERIFYING_FOR_OD'])
         result = ObjectDetectionController.validate(project, task_name)
