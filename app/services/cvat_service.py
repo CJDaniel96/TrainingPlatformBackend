@@ -1,5 +1,5 @@
 import os
-from urllib.parse import urljoin
+from urllib.parse import quote, urlencode, urljoin
 from app.config import CVAT_ANNOTATION_FORMAT, CVAT_DOWNLOAD_FORMAT, CVAT_LOGIN_API, CVAT_LOGIN_INFORMATION, CVAT_LOGOUT_API, CVAT_TASKS_ANNOTATION_API, CVAT_TASKS_DATA_API, CVAT_TASKS_DATASET_API, CVAT_TASKS_STATUS_API, CVAT_UPLOAD_INFORMATION, CVAT_URL, CVAT_TASKS_API
 import requests
 
@@ -77,6 +77,7 @@ class CVATService:
         parameters = {
             'format': CVAT_ANNOTATION_FORMAT
         }
+        parameters = urlencode(parameters, quote_via=quote)
         while True:
             response = requests.put(upload_url, headers=auth_header, params=parameters, files=upload_data)
             response.raise_for_status()
@@ -91,6 +92,7 @@ class CVATService:
             'format': CVAT_DOWNLOAD_FORMAT,
             'filename': task_name
         }
+        parameters = urlencode(parameters, quote_via=quote)
         while True:
             response = requests.get(download_url, headers=auth_header, params=parameters)
             response.raise_for_status()
