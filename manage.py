@@ -12,7 +12,7 @@ def insert_validated_images_to_db(project, group_type):
 def checkenv():
     Logger.info('Check Datasets Environment')
     # Check Enviroment
-    CheckEnvironmentController.check_datasets_environment()
+    CheckEnvironmentController.check_data_environment()
 
 def runserver():
     Logger.info('Training Platform serving...')

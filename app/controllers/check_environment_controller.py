@@ -1,10 +1,12 @@
-from app.services.check_environment_service import CheckDatasetsEnvironment, ClearLocalDataset
+from app.services.check_environment_service import CheckDatasetsEnvironment, CheckTmpEnvironment, ClearLocalDataset
 from app.services.logging_service import Logger
 
 
 class CheckEnvironmentController:
     @classmethod
-    def check_datasets_environment(cls):
+    def check_data_environment(cls):
+        CheckTmpEnvironment.check_tmp_path()
+
         CheckDatasetsEnvironment.check_origin_datasets_path()
         CheckDatasetsEnvironment.check_object_detection_basicline_datasets_path()
         CheckDatasetsEnvironment.check_classification_basicline_datasets_path()
