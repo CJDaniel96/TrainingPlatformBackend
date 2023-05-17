@@ -18,34 +18,40 @@ def app_run():
     if status == 'Init':
         cvat_cookie = CVATController.login()
         image_mode = record.image_mode
-        initial_controller = InitialController(record)
+        project = record.project
+        project_id = record.project_id
+        group_type = record.group_type
 
         if image_mode == 'query':
-            images = initial_controller.get_query_data()
+            site = record.site
+            line = record.line
+            group_type = record.group_type
+            start_date = record.start_date
+            end_date = record.end_date
+            smart_filter = record.smart_filter
+            images = InitialController.get_query_data(site, line, group_type, start_date, end_date, smart_filter)
             lines = eval(record.line)
         elif image_mode == 'upload':
-            images = initial_controller.get_upload_data()
+            uuids = record.images
+            images = InitialController.get_upload_data(uuids)
             lines = list(images.keys())
-            initial_controller.update_record_line(lines)
+            InitialController.update_record_line(lines)
         elif image_mode == 'upload_image':
-            images = initial_controller.get_upload_image_data()
+            uuids = record.images
+            images = InitialController.get_upload_image_data(uuids)
             lines = list(images.keys())
-            initial_controller.update_record_line(lines)
+            InitialController.update_record_line(lines)
 
         InitialController.download_images(images)
         serial_number = InitialController.get_serial_number()
         org_image_folder = InitialController.arrange_origin_images(serial_number)
 
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['INFERENCE_ON_GOING'])
-        project = record.project
         org_xml_folder = YOLOInferenceController.inference(org_image_folder, project)
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['INFERENCE_FINISH'])
 
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['UPLOAD_IMAGE_WITH_LOG_ON_GOING'])
-        project_id = record.project_id
-        group_type = record.group_type
         task_name = CVATController.get_task_name(lines, group_type, serial_number)
-        
         task_id = CVATController.upload(org_image_folder, org_xml_folder, project_id, task_name, cvat_cookie)
         Listener.update_record_task_id(tablename, id, task_id)
         Listener.update_record_task_name(tablename, id, task_name)
@@ -63,16 +69,17 @@ def app_run():
         cvat_cookie = CVATController.login()
         project = record.project
         task_name = record.task
-        CheckEnvironmentController.clear_local_data(status, project, task_name)
-
         task_id = record.task_id
-        task_name = record.task
+        group_type = record.group_type
+        site = record.site
+
+        CheckEnvironmentController.clear_local_data(status, project, task_name)
 
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['TRIGGER_TRAINING_FOR_OD'])
         task_zip_file = CVATController.download(task_id, task_name, cvat_cookie)
         train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
         ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
-        group_type = record.group_type
+        
         tasks = ObjectDetectionController.get_object_detection_tasks(task_id, group_type, tablename)
         if tasks:
             for id, name in tasks:
@@ -81,8 +88,7 @@ def app_run():
         ObjectDetectionController.merge_basicline_dataset(train_data_folder, project)
 
         Listener.update_record_object_detection_training_status(tablename, id, TRAINING_STATUS['RUNNING'])
-        site = record.site
-        group_type = record.group_type
+        
         data_yaml = ObjectDetectionController.get_data_yaml(site, group_type, project, train_data_folder)
         models_yaml = ObjectDetectionController.get_models_yaml(project)
 

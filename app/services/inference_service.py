@@ -125,7 +125,7 @@ class YOLOInference:
     def get_train_model_path(cls, project, task_name):
         return os.path.join(YOLO_TRAIN_MODEL_DIR, project, task_name, 'weights', 'best.pt')
 
-    @property
+    @classmethod
     def device(self):
         return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     

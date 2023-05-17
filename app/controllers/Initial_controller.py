@@ -4,30 +4,26 @@ from app.services.image_pool_service import ImagePool
 
 
 class InitialController:
-    def __init__(self, record) -> None:
-        self.site = record.site
-        self.line = record.line
-        self.group_type = record.group_type
-        self.start_date = record.start_date
-        self.end_date = record.end_date
-        self.smart_filter = record.smart_filter
-        self.uuids = record.images
-        self.id = record.id
-        self.tablename = record.__tablename__
+    def __init__(self) -> None: 
+        pass
 
-    def get_query_data(self):
-        return ImageDataService.get_images(self.site, self.line, self.group_type, self.start_date, self.end_date, self.smart_filter)
-
-    def get_upload_data(self):
-        return UploadData.get_images(self.uuids)
-
-    def get_upload_image_data(self):
-        return UploadImageDataService.get_images(self.uuids)
+    @classmethod
+    def get_query_data(cls, site, line, group_type, start_date, end_date, smart_filter):
+        return ImageDataService.get_images(site, line, group_type, start_date, end_date, smart_filter)
     
-    def update_record_line(self, lines):
-        if self.tablename == 'iri_record':
+    @classmethod
+    def get_upload_data(cls, uuids):
+        return UploadData.get_images(uuids)
+    
+    @classmethod
+    def get_upload_image_data(cls, uuids):
+        return UploadImageDataService.get_images(uuids)
+    
+    @classmethod
+    def update_record_line(cls, tablename, lines):
+        if tablename == 'iri_record':
             IRIRecordService.update_line(id, lines)
-        elif self.tablename == 'urd_record':
+        elif tablename == 'urd_record':
             URDRecordService.update_line(id, lines)
 
     @classmethod
