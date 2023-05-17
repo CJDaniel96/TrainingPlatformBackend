@@ -98,6 +98,7 @@ def app_run():
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['VERIFYING_FOR_OD'])
         result = ObjectDetectionController.validate(project, task_name)
         Listener.update_record_object_detection_training_info(result, task_id, group_type)
+        Listener.update_record_object_detection_training_status(tablename, id, TRAINING_STATUS['DONE'])
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['FINISH_FOR_OD'])
         CVATController.logout()
     elif status == 'CLS_Initialized':
