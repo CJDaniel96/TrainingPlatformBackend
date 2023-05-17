@@ -98,7 +98,7 @@ def app_run():
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['VERIFYING_FOR_OD'])
         result = ObjectDetectionController.validate(project, task_name)
         Listener.update_record_object_detection_training_info(result, task_id, group_type)
-        
+        Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['FINISH_FOR_OD'])
         CVATController.logout()
     elif status == 'CLS_Initialized':
         cvat_cookie = CVATController.login()
@@ -121,5 +121,5 @@ def app_run():
             model_id = ClassificationController.upload_ai_model_information(yolo_train_model_path, id, finetune_type, group_type, result)
             ClassificationController.upload_ai_model_performance(model_id, underkills, yolo_train_model_path, crop_image_ids, train_dataset_inference_task_id)
             
-        
+        Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['FINISHED'])
         CVATController.logout()
