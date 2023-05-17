@@ -190,6 +190,13 @@ class YOLOInference:
         cls().check_folder(dst_folder)
 
         return dst_folder
+    
+    @classmethod
+    def get_underkill_folder(cls, project, task_name):
+        dst_folder = os.path.join(OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, project, task_name)
+        cls().check_folder(dst_folder)
+        
+        return dst_folder
 
 
 class CHIPRCInference(YOLOInference):
@@ -314,7 +321,7 @@ class CHIPRCInference(YOLOInference):
                     return True
                 
     @classmethod
-    def output_underkill_image(cls, image_path, project, task_name):
+    def output_underkill_image(cls, image_path, underkill_folder):
         image_name = os.path.basename(image_path)
-        dst_path = os.path.join(OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, project, task_name, image_name)
+        dst_path = os.path.join(underkill_folder, image_name)
         shutil.copyfile(image_path, dst_path)

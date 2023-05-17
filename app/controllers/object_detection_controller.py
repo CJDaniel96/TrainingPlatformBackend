@@ -70,10 +70,11 @@ class ObjectDetectionController:
             criterion = CHIPRCInference.get_criterion()
 
             validation_images = CHIPRCInference.get_validation_images(project)
+            underkill_folder = CHIPRCInference.get_underkill_folder(project, task_name)
             for validation_image in validation_images:
                 answer, chiprcs = CHIPRCInference.yolo_predict(model, validation_image)
                 if answer and CHIPRCInference.vae_predict(validation_image, chiprcs, transform, generator, discriminator, encoder, criterion):
                     final_answer = False
-                    CHIPRCInference.output_underkill_image(validation_image, project, task_name)
+                    CHIPRCInference.output_underkill_image(validation_image, underkill_folder)
 
             return final_answer
