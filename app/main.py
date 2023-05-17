@@ -104,6 +104,7 @@ def app_run():
     elif status == 'CLS_Initialized':
         cvat_cookie = CVATController.login()
         project = record.project
+        task_id = record.task_id
         task_name = record.task
         group_type = record.group_type
         if ClassificationController.check_coutinue_train_classification_model(project):
