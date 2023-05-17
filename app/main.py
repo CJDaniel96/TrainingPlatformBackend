@@ -103,12 +103,12 @@ def app_run():
         CVATController.logout()
     elif status == 'CLS_Initialized':
         cvat_cookie = CVATController.login()
+        project = record.project
+        task_name = record.task
+        group_type = record.group_type
         if ClassificationController.check_coutinue_train_classification_model(project):
             ...
         else:
-            project = record.project
-            task_name = record.task
-            group_type = record.group_type
             train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
 
             yolo_train_model_path = YOLOInferenceController.get_train_model_path(project, task_name)
