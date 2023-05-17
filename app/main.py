@@ -109,14 +109,15 @@ def app_run():
         if ClassificationController.check_coutinue_train_classification_model(project):
             ...
         else:
-            train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
+            train_dataset_inference_task_name = CVATController.custom_task_name(task_name, 'inference')
+            task_zip_file = CVATController.download(task_id, train_dataset_inference_task_name, cvat_cookie)
+            train_data_folder = ObjectDetectionController.get_train_data_folder(project, train_dataset_inference_task_name)
 
             yolo_train_model_path = YOLOInferenceController.get_train_model_path(project, task_name)
             train_dataset_inference_image_folder, train_dataset_inference_xml_folder = YOLOInferenceController.train_dataset_inference(project, task_name, yolo_train_model_path, train_data_folder)
-            train_dataset_inference_task_name = CVATController.custom_task_name(task_name, 'inference')
             train_dataset_inference_task_id = CVATController.upload(train_dataset_inference_image_folder, train_dataset_inference_xml_folder, project_id, train_dataset_inference_task_name, cvat_cookie)
 
-            finetune_type = ClassificationController.get_finetune_type(tablename, project, task_name)
+            finetune_type = ClassificationController.get_finetune_type(tablename)
             underkills, result = ClassificationController.check_underkills(project, task_name)
             crop_image_ids = ClassificationController.upload_upload_crop_categorizing(underkills, group_type, id, finetune_type)
             model_id = ClassificationController.upload_ai_model_information(yolo_train_model_path, id, finetune_type, group_type, result)

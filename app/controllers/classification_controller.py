@@ -18,7 +18,7 @@ class ClassificationController:
             return False
 
     @classmethod
-    def get_finetune_type(cls, tablename, project, task_name):
+    def get_finetune_type(cls, tablename):
         return tablename.split('_')[0].upper()
     
     @classmethod
