@@ -35,12 +35,12 @@ def app_run():
             uuids = record.images
             images = InitialController.get_upload_data(uuids)
             lines = InitialController.get_image_lines(images)
-            InitialController.update_record_line(tablename, lines)
+            InitialController.update_record_line(tablename, id, lines)
         elif image_mode == 'upload_image':
             uuids = record.images
             images = InitialController.get_upload_image_data(uuids)
             lines = InitialController.get_image_lines(images)
-            InitialController.update_record_line(tablename, lines)
+            InitialController.update_record_line(tablename, id, lines)
 
         InitialController.download_images(images)
         serial_number = InitialController.get_serial_number()

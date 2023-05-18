@@ -24,7 +24,7 @@ class InitialController:
         return [line for line in images]
     
     @classmethod
-    def update_record_line(cls, tablename, lines):
+    def update_record_line(cls, tablename, id, lines):
         if tablename == 'iri_record':
             IRIRecordService.update_line(id, lines)
         elif tablename == 'urd_record':
