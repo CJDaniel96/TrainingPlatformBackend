@@ -23,7 +23,7 @@ class CVATController:
     def custom_task_name(*names):
         task_name = ''
         for name in names:
-            if name is str:
+            if type(name) is str:
                 task_name += name + '_'
         task_name = task_name[:-1]
 
