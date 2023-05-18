@@ -286,12 +286,15 @@ class TrainingInfoService:
     @classmethod
     def get_object_detection_model_version(cls, comp_type, val_status):
         with create_session(AI) as session:
-            data =  session.query(ODTrainingInfo).filter(
+            data = session.query(ODTrainingInfo).filter(
                 ODTrainingInfo.comp_type == comp_type,
                 ODTrainingInfo.val_status == val_status
             ).order_by(ODTrainingInfo.model_version.desc()).first()
 
+        if data:
             return data.model_version
+        else:
+            return '0'
         
     @classmethod
     def insert_object_detection_result(cls, task_id, comp_type, val_status, model_version): 

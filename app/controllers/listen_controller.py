@@ -59,13 +59,14 @@ class Listener:
         Logger.info('Update Database Record Object Detection Training Information')
         if result:
             val_status = 'APPROVE'
-        else:
-            val_status = 'FAIL'
-        model_version = TrainingInfoService.get_object_detection_model_version(comp_type, val_status)
+            model_version = TrainingInfoService.get_object_detection_model_version(comp_type, val_status)
 
-        if result:
             if model_version:
                 model_version = int(model_version) + 1
             else:
                 model_version = 1
+        else:
+            val_status = 'FAIL'
+            model_version = None
+            
         TrainingInfoService.insert_object_detection_result(task_id, comp_type, val_status, model_version)
