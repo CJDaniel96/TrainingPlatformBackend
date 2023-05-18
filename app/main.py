@@ -113,7 +113,8 @@ def app_run():
         else:
             train_dataset_inference_task_name = CVATController.custom_task_name(task_name, 'inference')
             task_zip_file = CVATController.download(task_id, train_dataset_inference_task_name, cvat_cookie)
-            train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
+            train_data_folder = ObjectDetectionController.get_train_data_folder(project, train_dataset_inference_task_name)
+            ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
 
             yolo_train_model_path = YOLOInferenceController.get_train_model_path(project, task_name)
             train_dataset_inference_image_folder, train_dataset_inference_xml_folder = YOLOInferenceController.train_dataset_inference(project, task_name, yolo_train_model_path, train_data_folder)
