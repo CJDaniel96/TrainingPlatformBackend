@@ -20,6 +20,10 @@ class InitialController:
         return UploadImageDataService.get_images(uuids)
     
     @classmethod
+    def get_image_lines(cls, images):
+        return [line for line in images]
+    
+    @classmethod
     def update_record_line(cls, tablename, lines):
         if tablename == 'iri_record':
             IRIRecordService.update_line(id, lines)

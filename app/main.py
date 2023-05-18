@@ -34,12 +34,12 @@ def app_run():
         elif image_mode == 'upload':
             uuids = record.images
             images = InitialController.get_upload_data(uuids)
-            lines = list(images.keys())
+            lines = InitialController.get_image_lines(images)
             InitialController.update_record_line(lines)
         elif image_mode == 'upload_image':
             uuids = record.images
             images = InitialController.get_upload_image_data(uuids)
-            lines = list(images.keys())
+            lines = InitialController.get_image_lines(images)
             InitialController.update_record_line(lines)
 
         InitialController.download_images(images)
