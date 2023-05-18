@@ -1,4 +1,4 @@
-from app.services.database_service import IRIRecordService, ImageDataService, ImagePoolService, URDRecordService, UploadData, UploadImageDataService
+from app.services.database_service import IRIRecordService, ImageDataService, ImagePoolService, URDRecordService, UploadDataService, UploadImageDataService
 from app.services.datasets_service import OriginDataProcessing
 from app.services.image_pool_service import ImagePool
 
@@ -13,7 +13,7 @@ class InitialController:
     
     @classmethod
     def get_upload_data(cls, uuids):
-        return UploadData.get_images(uuids)
+        return UploadDataService.get_images(uuids)
     
     @classmethod
     def get_upload_image_data(cls, uuids):
