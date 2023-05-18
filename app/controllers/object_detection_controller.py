@@ -1,6 +1,6 @@
 from app.services.database_service import CategoryMappingService, IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.datasets_service import ObjectDetectionTrainDataProcessing
-from app.services.inference_service import CHIPRCInference, YOLOInference
+from app.services.inference_service import CHIPRCInference, PCIEInference, YOLOInference
 from app.services.logging_service import Logger
 from app.services.train_service import YOLOTrain
 
@@ -76,5 +76,23 @@ class ObjectDetectionController:
                 if answer and CHIPRCInference.vae_predict(validation_image, chiprcs, transform, generator, discriminator, encoder, criterion):
                     final_answer = False
                     CHIPRCInference.output_underkill_image(validation_image, underkill_folder)
+
+            return final_answer
+        
+        elif project == 'NK_PCIE_2':
+            model_file = PCIEInference.get_train_model_path(project, task_name)
+            classification_model_path = PCIEInference.get_classification_model_path(project)
+            pinlocation_model_path = PCIEInference.get_pinlocation_model_path(project)
+            model = PCIEInference.load_model(model_file)
+            classification_model = PCIEInference.get_classification_model(classification_model_path)
+            pinlocation_model = PCIEInference.get_pinlocation_model(pinlocation_model_path)
+
+            validation_images = PCIEInference.get_validation_images(project)
+            underkill_folder = PCIEInference.get_underkill_folder(project, task_name)
+            for validation_image in validation_images:
+                answer = PCIEInference.classification_inference(validation_image, classification_model)
+                if answer and PCIEInference.object_detection_inference(model, pinlocation_model, validation_image):
+                    final_answer = False
+                    PCIEInference.output_underkill_image(validation_image, underkill_folder)
 
             return final_answer

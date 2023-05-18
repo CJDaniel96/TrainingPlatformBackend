@@ -1,4 +1,4 @@
-from app.services.check_environment_service import CheckDatasetsEnvironment, CheckTmpEnvironment, ClearLocalDataset
+from app.services.check_environment_service import CheckDatasetsEnvironment, CheckModelEnvironment, CheckTmpEnvironment, ClearLocalDataset
 from app.services.logging_service import Logger
 
 
@@ -19,6 +19,14 @@ class CheckEnvironmentController:
         CheckDatasetsEnvironment.check_object_detection_underkill_datasets_path()
         CheckDatasetsEnvironment.check_classification_underkill_datasets_path()
         CheckDatasetsEnvironment.check_yolo_train_yamls_path()
+
+    @classmethod
+    def check_model_environment(cls):
+        CheckModelEnvironment.check_classification_inference_models_dir()
+        CheckModelEnvironment.check_gan_inference_models_dir()
+        CheckModelEnvironment.check_mobilenet_train_models_dir()
+        CheckModelEnvironment.check_yolo_inference_models_dir()
+        CheckModelEnvironment.check_yolo_train_models_dir()
 
     @classmethod
     def clear_local_data(cls, status, project, task_name):

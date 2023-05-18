@@ -127,6 +127,8 @@ class CheckDatasetsEnvironment:
             Logger.info(f'Create {YOLO_TRAIN_HYPS_YAML_DIR}')
             os.makedirs(YOLO_TRAIN_HYPS_YAML_DIR)
 
+
+class CheckModelEnvironment:
     @classmethod
     def check_gan_inference_models_dir(cls):
         Logger.info('Check Gan Inference Models Dir')
@@ -161,6 +163,15 @@ class CheckDatasetsEnvironment:
             folder = os.path.join(YOLO_TRAIN_MODEL_DIR, project)
             if not os.path.exists(folder):
                 Logger.info(f'Create {project} YOLO Train Models Dir')
+                os.makedirs(folder)
+
+    @classmethod
+    def check_classification_inference_models_dir(cls):
+        Logger.info('Check Classification Inference Models Dir')
+        for project in PROJECTS:
+            folder = os.path.join(YOLO_TRAIN_MODEL_DIR, project)
+            if not os.path.exists(folder):
+                Logger.info(f'Create {project} Classification Inference Models Dir')
                 os.makedirs(folder)
 
 

@@ -1,17 +1,18 @@
+import pickle
 import shutil
-from app.services.model_service import Discriminator, Encoder, Generator
-from app.config import GAN_INFERENCE_MODEL_DIR, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR, YOLOV5_DIR
-from xml.dom.minidom import Document
-from glob import glob
-from torchvision import transforms
-from torch.utils.data import DataLoader
-from PIL import Image
 import os
 import torch
 import torch.nn as nn
 import cv2
 import numpy as np
-
+from app.services.model_service import Discriminator, Encoder, Generator
+from xml.dom.minidom import Document
+from glob import glob
+from torchvision import transforms
+from torch.utils.data import DataLoader
+from PIL import Image
+from torch.nn import functional as F
+from app.config import CLASSIFICATION_INFERNCE_MODEL_DIR, GAN_INFERENCE_MODEL_DIR, OBJECT_DETECTION_PCIE_BODY_THRESHOLD, OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES, OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS, OBJECT_DETECTION_PCIE_PART_NUMBER, OBJECT_DETECTION_PCIE_PCIE_THRESHOLD, OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME, OBJECT_DETECTION_PCIE_WAYS, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR, YOLOV5_DIR, OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN, OBJECT_DETECTION_PCIE_CLASSIFICATION_STD
 from data.config import OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR
 
 
@@ -197,6 +198,12 @@ class YOLOInference:
         cls().check_folder(dst_folder)
         
         return dst_folder
+    
+    @classmethod
+    def output_underkill_image(cls, image_path, underkill_folder):
+        image_name = os.path.basename(image_path)
+        dst_path = os.path.join(underkill_folder, image_name)
+        shutil.copyfile(image_path, dst_path)
 
 
 class CHIPRCInference(YOLOInference):
@@ -319,9 +326,142 @@ class CHIPRCInference(YOLOInference):
                     return False
                 else:
                     return True
-                
+
+
+class PCIEInference(YOLOInference):
+    def __init__(self) -> None:
+        super().__init__()
+
     @classmethod
-    def output_underkill_image(cls, image_path, underkill_folder):
-        image_name = os.path.basename(image_path)
-        dst_path = os.path.join(underkill_folder, image_name)
-        shutil.copyfile(image_path, dst_path)
+    def get_classification_model_path(cls, project):
+        return os.path.join(CLASSIFICATION_INFERNCE_MODEL_DIR, project, 'classification_model.pt')
+
+    @classmethod
+    def get_pinlocation_model_path(cls, project):
+        return os.path.join(YOLO_INFERENCE_MODEL_DIR, project, OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME)
+
+    @classmethod
+    def get_classification_model(cls, model_path):
+        return torch.load(model_path, map_location=cls().device())
+    
+    @classmethod
+    def get_pinlocation_model(cls, model_path):
+        return pickle.load(open(model_path, 'rb'))
+    
+    @classmethod
+    def classification_inference(cls, image_path, model):
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)), 
+            transforms.ToTensor(), 
+            transforms.Normalize(
+                mean=OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN, 
+                std=OBJECT_DETECTION_PCIE_CLASSIFICATION_STD
+            )
+        ])
+        # Read image and run prepro
+        image = Image.open(image_path).convert("RGB")
+        image_tensor = transform(image)
+        image_tensor = image_tensor.unsqueeze(0)
+        image = DataLoader(
+            image_tensor,
+            batch_size=1,
+            shuffle=True
+        )
+        for inputs in image:
+            inputs = inputs.to(cls().device())
+            outputs = model(inputs)
+            outputs = F.softmax(outputs, dim=1)
+            _, preds = torch.max(outputs, 1)
+        if OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES[preds[0]] == 'OK':
+            return True
+        else:
+            return False
+        
+    @classmethod
+    def object_detection_inference(cls, model, pinlocation_model, image_path):
+        result = model(image_path).pandas().xyxy[0]
+        img_size = cv2.imread(image_path, 1).shape
+        class_names = result['name'].unique()
+        body_xmin = 0
+        body_ymin = 0
+        body_xmax = 0
+        body_ymax = 0
+
+        for way in OBJECT_DETECTION_PCIE_WAYS.keys():
+            if way in os.path.basename(image_path):
+                img_way = OBJECT_DETECTION_PCIE_WAYS[way]
+        for comp in OBJECT_DETECTION_PCIE_PART_NUMBER.keys():
+            if comp in os.path.basename(image_path):
+                img_comp = OBJECT_DETECTION_PCIE_PART_NUMBER[comp]
+
+        lcl_pcie = []
+        lcl_body = []
+
+        PCIE = result[result['name'] == 'PCIE']['confidence']
+        for i, conf in enumerate(PCIE):
+            if conf < OBJECT_DETECTION_PCIE_PCIE_THRESHOLD:
+                lcl_pcie.append(PCIE.index[i])
+        result = result.drop(index=lcl_pcie)
+
+        BODY = result[result['name'] == 'BODY']['confidence']
+        for i, conf in enumerate(BODY):
+            if conf < OBJECT_DETECTION_PCIE_BODY_THRESHOLD:
+                lcl_body.append(BODY.index[i])
+        result = result.drop(index=lcl_body)
+
+        for NG_type in OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS:
+            if NG_type in class_names:
+                return False
+
+        if 'PCIE' not in class_names:
+            return False
+        if 'BODY' not in class_names:
+            return False
+
+        BODY = result[result['name']=='BODY']
+        if BODY.shape[0] >= 1:
+            area_max = 1000000
+            area_index = -1
+            for i in range(BODY.shape[0]):
+                item = BODY.iloc[i,:]
+                area = (item['xmax'] - item['xmin']) * (item['ymax'] - item['ymin'])
+                if area <= area_max:
+                    area_max = area
+                    area_index = BODY.index[i]
+            sub_BODY = BODY.loc[area_index, :]
+
+            body_xmin = sub_BODY['xmin']
+            body_ymin = sub_BODY['ymin']
+            body_xmax = sub_BODY['xmax']
+            body_ymax = sub_BODY['ymax']
+
+            if area_index == -1:
+                return False
+            elif (body_xmin < 10) or (body_ymin < 10) or (body_xmax > img_size[1]-5) or ((body_ymax > img_size[0]-5)):
+                return False
+        
+        Pin_OK = result[result['name']=='PIN_OK']
+        Pin_index = -1
+        if Pin_OK.shape[0] >= 1:
+            for i in Pin_OK.index:
+                item = Pin_OK.loc[i,:]
+                if (body_xmin - 5 < item['xmin']) & (body_ymin - 5 < item['ymin']) & (body_xmax + 5 > item['xmax']) & (body_ymax + 5 > item['ymax']):
+                    Pin_index = i
+                    break
+        if Pin_index == -1:
+            return False
+        else:
+            sub_Pin = Pin_OK.loc[Pin_index, :]
+            Pin_xmin, Pin_ymin, Pin_xmax, Pin_ymax = sub_Pin['xmin'], sub_Pin['ymin'], sub_Pin['xmax'], sub_Pin['ymax']
+            Pin_data = [[body_xmin, body_ymin, body_xmax, body_ymax, Pin_xmin, Pin_ymin, Pin_xmax, Pin_ymax, img_way, img_comp]]
+            Pin_result = pinlocation_model.predict(Pin_data)[0]
+
+            if Pin_result == -1:
+                return 'NG'
+
+        if 'W' in class_names:
+            return True
+        elif 'EXPOSURE' in class_names:
+            return True
+        else:
+            return True

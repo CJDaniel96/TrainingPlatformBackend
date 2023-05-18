@@ -63,6 +63,8 @@ YOLO_TRAIN_MODEL_DIR = './app/models/yolo_train'
 
 GAN_INFERENCE_MODEL_DIR = './app/models/gan_inference'
 
+CLASSIFICATION_INFERNCE_MODEL_DIR = './app/models/classification_inference'
+
 # CVAT Settings
 
 CVAT_URL = 'http://10.0.13.80:8080'
@@ -96,9 +98,9 @@ CVAT_UPLOAD_INFORMATION = {'image_quality': 70}
 
 YOLOV5_DIR = 'app/yolov5'
 
-BATCH_SIZE = 8
+YOLOV5_BATCH_SIZE = 8
 
-EPOCHS = 300
+YOLOV5_EPOCHS = 300
 
 # Training Flow Settings
 
@@ -106,3 +108,32 @@ TRAINING_FLOW = {
     'NK_DAOI_CHIPRC_2': ['object_detection'],
     'NK_PCIE_2': ['object_detection']
 }
+
+# Object Detection PCIE Settings
+
+OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN = [0.1522, 0.2014, 0.3004]
+
+OBJECT_DETECTION_PCIE_CLASSIFICATION_STD = [0.1180, 0.1408, 0.1840]
+
+OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES = ['NG-dark', 'NG-melt', 'NG-others', 'OK']
+
+OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS = ['MELT', 'FOV', 'BIT', 'PIN_CHK', 'STAN', 'SHIFT', 'PIN_CHK']
+
+OBJECT_DETECTION_PCIE_WAYS = {
+    '-DO':0, 
+    '-UP':1, 
+    '-L':2, 
+    '-R':3
+}
+
+OBJECT_DETECTION_PCIE_PART_NUMBER = {
+    'DIMM':0, 
+    'JPCIE':1, 
+    'PCIE':2
+}
+
+OBJECT_DETECTION_PCIE_PCIE_THRESHOLD = 0.7
+
+OBJECT_DETECTION_PCIE_BODY_THRESHOLD = 0.7
+
+OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME = 'pcie_pinlocation_model.pkl'

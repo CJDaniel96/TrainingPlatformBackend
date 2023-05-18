@@ -13,6 +13,7 @@ def checkenv():
     Logger.info('Check Datasets Environment')
     # Check Enviroment
     CheckEnvironmentController.check_data_environment()
+    CheckEnvironmentController.check_model_environment()
 
 def runserver():
     Logger.info('Training Platform serving...')
