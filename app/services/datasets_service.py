@@ -165,13 +165,17 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
         train_images_folder = os.path.join(train_data_folder, 'images', 'train')
         train_labels_folder = os.path.join(train_data_folder, 'labels', 'train')
 
-        for image in glob(os.path.join(basicline_dataset, 'images', 'train', '*.jpg')):
-            shutil.copyfile(image, os.path.join(train_images_folder, os.path.basename(image)))
-        for label in glob(os.path.join(basicline_dataset, 'labels', 'train', '*.txt')):
-            shutil.copyfile(label, os.path.join(train_labels_folder, os.path.basename(label)))
-        
-        shutil.copytree(os.path.join(basicline_dataset, 'images', 'val'), os.path.join(train_data_folder, 'images', 'val'))
-        shutil.copytree(os.path.join(basicline_dataset, 'labels', 'val'), os.path.join(train_data_folder, 'labels', 'val'))
+        train_images_basicline_dataset = glob(os.path.join(basicline_dataset, 'images', 'train', '*.jpg'))
+        train_labels_basicline_dataset = glob(os.path.join(basicline_dataset, 'labels', 'train', '*.txt'))
+
+        if train_images_basicline_dataset and train_labels_basicline_dataset:
+            for image in train_images_basicline_dataset:
+                shutil.copyfile(image, os.path.join(train_images_folder, os.path.basename(image)))
+            for label in train_labels_basicline_dataset:
+                shutil.copyfile(label, os.path.join(train_labels_folder, os.path.basename(label)))
+            
+            shutil.copytree(os.path.join(basicline_dataset, 'images', 'val'), os.path.join(train_data_folder, 'images', 'val'))
+            shutil.copytree(os.path.join(basicline_dataset, 'labels', 'val'), os.path.join(train_data_folder, 'labels', 'val'))
 
     @classmethod
     def write_data_yaml(cls, project, class_names, train_data_folder):
