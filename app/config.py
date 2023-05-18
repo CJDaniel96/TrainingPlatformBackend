@@ -13,6 +13,8 @@ URD_RECORD_STATUS = [
 
 LISTEN_DATABASE_TIME_SLEEP = 60
 
+SITE = 'TW'
+
 # Image Pool Settings
 
 IMAGE_POOL_DOWNLOAD_URL = 'http://172.20.20.10:8888/imagesinzip'

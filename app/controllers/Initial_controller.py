@@ -31,6 +31,13 @@ class InitialController:
             URDRecordService.update_line(id, lines)
 
     @classmethod
+    def update_record_site(cls, tablename, id, lines):
+        if tablename == 'iri_record':
+            IRIRecordService.update_site(id, lines)
+        elif tablename == 'urd_record':
+            URDRecordService.update_site(id, lines)
+
+    @classmethod
     def download_images(cls, images: dict):
         image_pools = ImagePoolService.get_image_pool()
         for image_pool in image_pools:

@@ -3,7 +3,7 @@ import json
 import os
 import random
 import uuid
-from app.config import IRI_RECORD_STATUS, URD_RECORD_STATUS
+from app.config import IRI_RECORD_STATUS, SITE, URD_RECORD_STATUS
 from app.services.logging_service import Logger
 from data.config import DATABASES
 from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CategoryMapping, CriticalNg, CropCategorizingRecord, ImagePool, IriRecord, ODTrainingInfo, UploadData, UrdRecord
@@ -29,6 +29,14 @@ class IRIRecordService:
         with create_session(AI) as session:
             session.query(IriRecord).filter(IriRecord.id == id).update({
                 'line': repr(lines).replace('\'', '"')
+            })
+            session.commit()
+
+    @classmethod
+    def update_site(cls, id):
+        with create_session(AI) as session:
+            session.query(IriRecord).filter(IriRecord.id == id).update({
+                'site': SITE
             })
             session.commit()
 
@@ -95,6 +103,14 @@ class URDRecordService:
         with create_session(AI) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 'line': repr(lines).replace('\'', '"')
+            })
+            session.commit()
+
+    @classmethod
+    def update_site(cls, id):
+        with create_session(AI) as session:
+            session.query(UrdRecord).filter(UrdRecord.id == id).update({
+                'site': SITE
             })
             session.commit()
 
