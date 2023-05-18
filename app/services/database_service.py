@@ -400,9 +400,9 @@ class AIModelInformationService:
     @classmethod
     def get_model_id(cls):
         with create_session(AI) as session:
-            data = session.query(AiModelInfo.model_id).order_by(AiModelInfo.model_id.desc).first()
+            data = session.query(AiModelInfo.model_id).order_by(AiModelInfo.model_id.desc()).first()
 
-            return data.model_id
+        return data.model_id
         
 
 class AIModelPerformanceService:
