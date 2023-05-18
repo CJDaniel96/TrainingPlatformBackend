@@ -1,6 +1,6 @@
 import os
 import shutil
-from app.config import GAN_INFERENCE_MODEL_DIR, MOBILENET_TRAIN_MODEL_DIR, PROJECTS, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR
+from app.config import CLASSIFICATION_INFERNCE_MODEL_DIR, GAN_INFERENCE_MODEL_DIR, MOBILENET_TRAIN_MODEL_DIR, PROJECTS, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR
 from app.services.logging_service import Logger
 from data.config import CLASSIFICATION_BASICLINE_DATASETS_DIR, CLASSIFICATION_INFERENCE_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR, ORIGIN_DATASETS_DIR, OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, CLASSIFICATION_TRAIN_DATASETS_DIR, TMP_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR
 
@@ -160,7 +160,7 @@ class CheckModelEnvironment:
     def check_yolo_train_models_dir(cls):
         Logger.info('Check YOLO Train Models Dir')
         for project in PROJECTS:
-            folder = os.path.join(YOLO_TRAIN_MODEL_DIR, project)
+            folder = os.path.join(CLASSIFICATION_INFERNCE_MODEL_DIR, project)
             if not os.path.exists(folder):
                 Logger.info(f'Create {project} YOLO Train Models Dir')
                 os.makedirs(folder)
@@ -169,7 +169,7 @@ class CheckModelEnvironment:
     def check_classification_inference_models_dir(cls):
         Logger.info('Check Classification Inference Models Dir')
         for project in PROJECTS:
-            folder = os.path.join(YOLO_TRAIN_MODEL_DIR, project)
+            folder = os.path.join(CLASSIFICATION_INFERNCE_MODEL_DIR, project)
             if not os.path.exists(folder):
                 Logger.info(f'Create {project} Classification Inference Models Dir')
                 os.makedirs(folder)
