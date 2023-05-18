@@ -388,14 +388,14 @@ class AIModelInformationService:
     def update(cls, group_type, model_path, ip_address, finetune_id, finetune_type, verified_status, crop_name='ORG'):
         with create_session(AI) as session:
             session.add(AiModelInfo(
-            model_type=group_type,
-            model_name=crop_name,
-            model_path=f'{ip_address}//{model_path}',
-            verified_status=verified_status,
-            finetune_id=finetune_id,
-            finetune_type=finetune_type
-        ))
-        session.commit()
+                model_type=group_type,
+                model_name=crop_name,
+                model_path=f'{ip_address}//{os.path.abspath(model_path)}',
+                verified_status=verified_status,
+                finetune_id=finetune_id,
+                finetune_type=finetune_type
+            ))
+            session.commit()
 
     @classmethod
     def get_model_id(cls):

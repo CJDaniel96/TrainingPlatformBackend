@@ -66,7 +66,7 @@ class ClassificationController:
         Logger.info('Upload Database Record AI Model Performance')
         if 'best.pt' in model_path:
             loss = UnderkillDataProcessing.get_loss(project, task_name)
-            accuracy = UnderkillDataProcessing.get_accuracy(underkills)
+            accuracy = UnderkillDataProcessing.get_accuracy(underkills, project)
 
         metrics_result = UnderkillDataProcessing.get_metrics_result(loss, accuracy, crop_image_ids, training_datasets_inferece_task_id)
         false_negative_images = UnderkillDataProcessing.get_false_negative_images(crop_image_ids)
