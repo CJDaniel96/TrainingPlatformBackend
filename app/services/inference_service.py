@@ -174,7 +174,7 @@ class YOLOInference:
         image_name = os.path.basename(image_path)
         dst_folder = os.path.join(OBJECT_DETECTION_INFERENCE_DATASETS_DIR, project, task_name, 'images')
         cls().check_folder(dst_folder)
-        shutil.copyfile(image_path, os.path.join(dst_folder, image_name))
+        shutil.copyfile(image_path, os.path.abspath(os.path.join(dst_folder, image_name)))
 
         return dst_folder
     
@@ -202,7 +202,7 @@ class YOLOInference:
     @classmethod
     def output_underkill_image(cls, image_path, underkill_folder):
         image_name = os.path.basename(image_path)
-        dst_path = os.path.join(underkill_folder, image_name)
+        dst_path = os.path.abspath(os.path.join(underkill_folder, image_name))
         shutil.copyfile(image_path, dst_path)
 
 

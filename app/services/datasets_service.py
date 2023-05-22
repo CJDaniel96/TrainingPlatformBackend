@@ -145,9 +145,9 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
         cls().makedirs(train_labels_folder)
 
         for image in glob(os.path.join(train_data_dir, '*.jpg')):
-            shutil.copyfile(image, os.path.join(train_images_folder, os.path.basename(image)))
+            shutil.copyfile(image, os.path.abspath(os.path.join(train_images_folder, os.path.basename(image))))
         for label in glob(os.path.join(train_data_dir, '*.txt')):
-            shutil.copyfile(label, os.path.join(train_labels_folder, os.path.basename(label)))
+            shutil.copyfile(label, os.path.abspath(os.path.join(train_labels_folder, os.path.basename(label))))
 
         if os.path.isdir(train_data_dir):
             shutil.rmtree(train_data_dir)
@@ -171,9 +171,9 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
 
         if train_images_basicline_dataset and train_labels_basicline_dataset:
             for image in train_images_basicline_dataset:
-                shutil.copyfile(image, os.path.join(train_images_folder, os.path.basename(image)))
+                shutil.copyfile(image, os.path.abspath(os.path.join(train_images_folder, os.path.basename(image))))
             for label in train_labels_basicline_dataset:
-                shutil.copyfile(label, os.path.join(train_labels_folder, os.path.basename(label)))
+                shutil.copyfile(label, os.path.abspath(os.path.join(train_labels_folder, os.path.basename(label))))
             
             shutil.copytree(os.path.join(basicline_dataset, 'images', 'val'), os.path.join(train_data_folder, 'images', 'val'))
             shutil.copytree(os.path.join(basicline_dataset, 'labels', 'val'), os.path.join(train_data_folder, 'labels', 'val'))
