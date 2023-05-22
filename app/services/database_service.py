@@ -356,7 +356,7 @@ class CriticalNGService:
 
     @classmethod
     def get_image_uuid(cls, image, group_type, crop_name='ORG'):
-        image_path = f'{group_type}/{crop_name}/{image}'
+        image_path = f'{group_type}/{crop_name}/{os.path.basename(image)}'
         with create_session(AI) as session:
             data = session.query(CriticalNg.img_id).filter(CriticalNg.image_path == image_path).first()
 
