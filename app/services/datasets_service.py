@@ -162,7 +162,7 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
 
     @classmethod
     def merge_object_detection_basicline_data(cls, train_data_folder, project):
-        basicline_dataset = os.path.join(OBJECT_DETECTION_BASICLINE_DATASETS_DIR, project)
+        basicline_dataset = os.path.abspath(os.path.join(OBJECT_DETECTION_BASICLINE_DATASETS_DIR, project))
         train_images_folder = os.path.join(train_data_folder, 'images', 'train')
         train_labels_folder = os.path.join(train_data_folder, 'labels', 'train')
 
@@ -174,15 +174,25 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
                 try:
                     shutil.copyfile(image, os.path.abspath(os.path.join(train_images_folder, os.path.basename(image))))
                 except FileNotFoundError:
-                    continue
+                    long_src_path = '\\\\?\\' + image
+                    long_dst_path = '\\\\?\\' + os.path.abspath(os.path.join(train_images_folder, os.path.basename(image)))
+                    shutil.copyfile(long_src_path, long_dst_path)
             for label in train_labels_basicline_dataset:
                 try:
                     shutil.copyfile(label, os.path.abspath(os.path.join(train_labels_folder, os.path.basename(label))))
                 except FileNotFoundError:
-                    continue
+                    long_src_path = '\\\\?\\' + image
+                    long_dst_path = '\\\\?\\' + os.path.abspath(os.path.join(train_labels_folder, os.path.basename(label)))
+                    shutil.copyfile(long_src_path, long_dst_path)
             
-            shutil.copytree(os.path.join(basicline_dataset, 'images', 'val'), os.path.join(train_data_folder, 'images', 'val'))
-            shutil.copytree(os.path.join(basicline_dataset, 'labels', 'val'), os.path.join(train_data_folder, 'labels', 'val'))
+            try:
+                shutil.copytree(os.path.join(basicline_dataset, 'images', 'val'), os.path.join(train_data_folder, 'images', 'val'))
+            except:
+                shutil.copytree('\\\\?\\' + os.path.join(basicline_dataset, 'images', 'val'), '\\\\?\\' + os.path.join(train_data_folder, 'images', 'val'))
+            try:
+                shutil.copytree('\\\\?\\' + os.path.join(basicline_dataset, 'labels', 'val'), '\\\\?\\' + os.path.join(train_data_folder, 'labels', 'val'))
+            except:
+                shutil.copytree('\\\\?\\' + os.path.join(basicline_dataset, 'labels', 'val'), '\\\\?\\' + os.path.join(train_data_folder, 'labels', 'val'))
 
     @classmethod
     def write_data_yaml(cls, project, class_names, train_data_folder):
