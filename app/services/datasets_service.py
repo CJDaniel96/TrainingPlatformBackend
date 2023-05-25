@@ -171,9 +171,15 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
 
         if train_images_basicline_dataset and train_labels_basicline_dataset:
             for image in train_images_basicline_dataset:
-                shutil.copyfile(image, os.path.abspath(os.path.join(train_images_folder, os.path.basename(image))))
+                try:
+                    shutil.copyfile(image, os.path.abspath(os.path.join(train_images_folder, os.path.basename(image))))
+                except FileNotFoundError:
+                    continue
             for label in train_labels_basicline_dataset:
-                shutil.copyfile(label, os.path.abspath(os.path.join(train_labels_folder, os.path.basename(label))))
+                try:
+                    shutil.copyfile(label, os.path.abspath(os.path.join(train_labels_folder, os.path.basename(label))))
+                except FileNotFoundError:
+                    continue
             
             shutil.copytree(os.path.join(basicline_dataset, 'images', 'val'), os.path.join(train_data_folder, 'images', 'val'))
             shutil.copytree(os.path.join(basicline_dataset, 'labels', 'val'), os.path.join(train_data_folder, 'labels', 'val'))
