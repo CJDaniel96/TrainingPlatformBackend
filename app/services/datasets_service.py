@@ -188,10 +188,14 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
             try:
                 shutil.copytree(os.path.join(basicline_dataset, 'images', 'val'), os.path.join(train_data_folder, 'images', 'val'))
             except:
+                if os.path.exists(os.path.join(train_data_folder, 'images', 'val')):
+                    shutil.rmtree(os.path.join(train_data_folder, 'images', 'val'))
                 shutil.copytree('\\\\?\\' + os.path.join(basicline_dataset, 'images', 'val'), os.path.join(train_data_folder, 'images', 'val'))
             try:
                 shutil.copytree(os.path.join(basicline_dataset, 'labels', 'val'),  os.path.join(train_data_folder, 'labels', 'val'))
             except:
+                if os.path.exists(os.path.join(train_data_folder, 'labels', 'val')):
+                    shutil.rmtree(os.path.join(train_data_folder, 'labels', 'val'))
                 shutil.copytree('\\\\?\\' + os.path.join(basicline_dataset, 'labels', 'val'), os.path.join(train_data_folder, 'labels', 'val'))
 
     @classmethod
