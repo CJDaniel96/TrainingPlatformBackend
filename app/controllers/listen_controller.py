@@ -1,4 +1,6 @@
 import time
+
+import psycopg2
 from app.config import LISTEN_DATABASE_TIME_SLEEP
 from app.services.database_service import IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.logging_service import Logger
@@ -9,8 +11,14 @@ class Listener:
     def listen(cls):
         while True:
             Logger.info('Check Database Record')
-            iri_record = IRIRecordService.status()
-            urd_record = URDRecordService.status()
+            try:
+                iri_record = IRIRecordService.status()
+                urd_record = URDRecordService.status()
+            except psycopg2.OperationalError:
+                Logger.critical(f'could not connect to database server: Connection timed out!, after {LISTEN_DATABASE_TIME_SLEEP}s will retry')
+                time.sleep(LISTEN_DATABASE_TIME_SLEEP)
+                continue
+
             if iri_record and urd_record:
                 if iri_record.update_time > urd_record.update_time:
                     return urd_record
