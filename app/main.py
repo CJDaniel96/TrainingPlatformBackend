@@ -1,5 +1,6 @@
 from app.config import TRAINING_PLATFORM_RECORD_STATUS, TRAINING_STATUS
 from app.controllers.Initial_controller import InitialController
+from app.controllers.categorize_controller import CategorizeController
 from app.controllers.check_environment_controller import CheckEnvironmentController
 from app.controllers.classification_controller import ClassificationController
 from app.controllers.cvat_controller import CVATController
@@ -60,10 +61,17 @@ def app_run():
     elif status == 'Categorizing' and tablename == 'urd_record':
         cvat_cookie = CVATController.login()
         category_ready = record.category_ready
+        project = record.project
+        task_id = record.task_id
+        task_name = record.task
+        group_type = record.group_type
+        site = record.site
+
         if category_ready != True:
-            task_id = record.task_id
-            task_name = record.task
             task_zip_file = CVATController.download(task_id, task_name, cvat_cookie)
+            train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
+            ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
+            CategorizeController.upload_categorizing_record(id, site, project, group_type, train_data_folder)
         CVATController.logout()
     elif status == 'OD_Initialized':
         cvat_cookie = CVATController.login()

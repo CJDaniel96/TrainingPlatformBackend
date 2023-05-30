@@ -324,7 +324,33 @@ class CategoryMappingService:
         labels = eval(data.labels)
 
         return list(labels.keys())
-    
+
+    @classmethod
+    def get_class_dict(cls, site, group_type, project):
+        with create_session(AI) as session:
+            data = session.query(CategoryMapping.labels).filter(
+                CategoryMapping.site == site,
+                CategoryMapping.group_type == group_type,
+                CategoryMapping.project == project
+            ).first()
+
+        labels = eval(data.labels)
+
+        return labels
+
+    @classmethod
+    def get_ok_category(cls, site, group_type, project):
+        with create_session(AI) as session:
+            data = session.query(CategoryMapping.ok_category).filter(
+                CategoryMapping.site == site,
+                CategoryMapping.group_type == group_type,
+                CategoryMapping.project == project
+            ).first()
+
+        labels = eval(data.ok_category)
+
+        return labels
+
 
 class CropCategorizingRecordService:
     def __init__(self) -> None:

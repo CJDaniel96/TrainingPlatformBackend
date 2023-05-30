@@ -219,3 +219,23 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
     @classmethod
     def get_hyps_yaml(cls, project):
         return os.path.join(YOLO_TRAIN_HYPS_YAML_DIR, project + '.yaml')
+    
+
+class CategorizeDataProcessing:
+    @classmethod
+    def get_images(cls, train_data_folder, image_type='*.jpg'):
+        return glob(os.path.join(train_data_folder, 'images', 'train', image_type))
+
+    @classmethod
+    def get_image_txt_file(cls, image_path, txt_type='.txt'):
+        txt_file_path = os.path.splitext(image_path.replace('images', 'labels'))[0] + txt_type
+        return txt_file_path
+
+    @classmethod
+    def check_image_result(cls, ok_category, class_dict, txt_file):
+        with open(txt_file, 'r') as f:
+            for line_data in f.readlines():
+                class_number = line_data.split(' ')[0]
+                if class_dict[class_number] not in ok_category:
+                    return 'NG'
+            return 'OK'
