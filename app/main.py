@@ -43,7 +43,7 @@ def app_run():
             lines = InitialController.get_image_lines(images)
             InitialController.update_record_line(tablename, id, lines)
 
-        InitialController.download_images(images)
+        InitialController.download_images(images, image_mode)
         serial_number = InitialController.get_serial_number()
         org_image_folder = InitialController.arrange_origin_images(serial_number)
 

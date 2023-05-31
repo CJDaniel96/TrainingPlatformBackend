@@ -38,12 +38,16 @@ class InitialController:
             URDRecordService.update_site(id, lines)
 
     @classmethod
-    def download_images(cls, images: dict):
+    def download_images(cls, images: dict, image_mode):
         image_pools = ImagePoolService.get_image_pool()
         for image_pool in image_pools:
-            if image_pool.line in images.keys():
+            if image_mode == image_pool.line:
+                image_list = list(images.values())[0]
+                ImagePool.download(image_pool, image_list)
+            elif image_pool.line in images.keys():
                 image_list = images[image_pool.line]
                 ImagePool.download(image_pool, image_list)
+
 
     @classmethod
     def get_serial_number(cls):
