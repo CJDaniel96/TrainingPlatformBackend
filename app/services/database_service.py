@@ -218,6 +218,18 @@ class ImageDataService(ImagePoolService):
 
             return images
 
+    @classmethod
+    def get_image_uuid(cls, image):
+        image_name = os.path.basename(image)
+        date_time = image_name.split('_')[0]
+        date = date_time[:4] + '-' + date_time[4:6] + '-' + date_time[6:8]
+        image_path = f'{date}/{date_time}/{image_name}'
+
+        with create_session(AMR_NIFI_TEST) as session:
+            data = session.query(AmrRawData.uuid).filter(AmrRawData.image_path == image_path).first()
+
+        return data.uuid
+
 
 class UploadDataService(ImagePoolService):
     def __init__(self) -> None:

@@ -1,5 +1,4 @@
-from app.services.cvat_service import CVATService
-from app.services.database_service import CategoryMappingService, CriticalNGService, CropCategorizingRecordService
+from app.services.database_service import CategoryMappingService, CropCategorizingRecordService, ImageDataService
 from app.services.datasets_service import CategorizeDataProcessing
 from app.services.inference_service import YOLOInference
 from app.services.logging_service import Logger
@@ -14,7 +13,7 @@ class CategorizeController:
         Logger.info('Upload Database Record Crop Categorizing')
         images = CategorizeDataProcessing.get_images(train_data_folder)
         for image_path in images:
-            image_uuid = CriticalNGService.get_image_uuid(image_path, group_type)
+            image_uuid = ImageDataService.get_image_uuid(image_path, group_type)
             image = YOLOInference.read_image(image_path)
             image_size = YOLOInference.get_image_size(image)
 
