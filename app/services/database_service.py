@@ -370,22 +370,25 @@ class CropCategorizingRecordService:
 
     @classmethod
     def update_underkill_image(cls, finetune_id, image_id, image_hight, image_wide, finetune_type, categorizing_code='OK', crop_name='ORG', critical_ng=True):
-        with create_session(AI) as session:
-            session.add(CropCategorizingRecord(
-                finetune_id=finetune_id, 
-                img_id=image_id, 
-                crop_name=crop_name,
-                x_min=0,
-                y_min=0,
-                x_max=image_wide,
-                y_max=image_hight,
-                categorizing_code=categorizing_code,
-                finetune_type=finetune_type,
-                critical_ng=critical_ng
-            ))
-            session.commit()
+        try:
+            with create_session(AI) as session:
+                session.add(CropCategorizingRecord(
+                    finetune_id=finetune_id, 
+                    img_id=image_id, 
+                    crop_name=crop_name,
+                    x_min=0,
+                    y_min=0,
+                    x_max=image_wide,
+                    y_max=image_hight,
+                    categorizing_code=categorizing_code,
+                    finetune_type=finetune_type,
+                    critical_ng=critical_ng
+                ))
+                session.commit()
 
-        return finetune_type + '@' + str(finetune_id) + '@' + image_id + '@' + crop_name
+            return finetune_type + '@' + str(finetune_id) + '@' + image_id + '@' + crop_name
+        except:
+            return
 
 
 class CriticalNGService:
