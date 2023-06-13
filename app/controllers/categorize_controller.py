@@ -22,6 +22,6 @@ class CategorizeController:
             txt_file = CategorizeDataProcessing.get_image_txt_file(image_path)
             categorizing_code = CategorizeDataProcessing.check_image_result(ok_category, class_dict, txt_file)
 
-            _ = CropCategorizingRecordService.update_underkill_image(record_id, image_uuid, image_size[0], image_size[1], finetune_type, categorizing_code)
+            _ = CropCategorizingRecordService.update_underkill_image(record_id, image_uuid, image_size[0], image_size[1], finetune_type, categorizing_code, critical_ng=False)
 
         return 

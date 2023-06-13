@@ -74,6 +74,7 @@ def app_run():
             CategorizeController.upload_categorizing_record(id, site, project, group_type, train_data_folder)
             Listener.update_category_ready(id)
             CVATController.logout()
+        Listener.timesleep()
     elif status == 'OD_Initialized':
         cvat_cookie = CVATController.login()
         project = record.project

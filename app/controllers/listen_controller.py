@@ -83,3 +83,7 @@ class Listener:
     def update_category_ready(cls, id):
         Logger.info('Update Database Record Catefory Ready Is Finish')
         URDRecordService.update_category_ready(id)
+
+    @classmethod
+    def timesleep(cls):
+        time.sleep(LISTEN_DATABASE_TIME_SLEEP)
