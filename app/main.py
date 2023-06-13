@@ -72,6 +72,7 @@ def app_run():
             train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
             ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
             CategorizeController.upload_categorizing_record(id, site, project, group_type, train_data_folder)
+            Listener.update_category_ready(id)
         CVATController.logout()
     elif status == 'OD_Initialized':
         cvat_cookie = CVATController.login()

@@ -78,3 +78,8 @@ class Listener:
             model_version = None
             
         TrainingInfoService.insert_object_detection_result(task_id, comp_type, val_status, model_version)
+
+    @classmethod
+    def update_category_ready(cls, id):
+        Logger.info('Update Database Record Catefory Ready Is Finish')
+        URDRecordService.update_category_ready(id)

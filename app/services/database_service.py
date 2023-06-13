@@ -163,6 +163,14 @@ class URDRecordService:
         
         return [[obj.task_id, obj.task] for obj in data]
 
+    @classmethod
+    def update_category_ready(cls, id):
+        with create_session(AI) as session:
+            session.query(UrdRecord).filter(UrdRecord.id == id).update({
+                "category_ready": True
+            })
+            session.commit()
+
 
 class ImagePoolService:
     def smart_filter_images(self, images):
