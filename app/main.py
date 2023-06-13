@@ -59,7 +59,6 @@ def app_run():
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['UPLOAD_IMAGE_WITH_LOG_FINISH'])
         CVATController.logout()
     elif status == 'Categorizing' and tablename == 'urd_record':
-        cvat_cookie = CVATController.login()
         category_ready = record.category_ready
         project = record.project
         task_id = record.task_id
@@ -68,12 +67,13 @@ def app_run():
         site = record.site
 
         if category_ready != True:
+            cvat_cookie = CVATController.login()
             task_zip_file = CVATController.download(task_id, task_name, cvat_cookie)
             train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
             ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
             CategorizeController.upload_categorizing_record(id, site, project, group_type, train_data_folder)
             Listener.update_category_ready(id)
-        CVATController.logout()
+            CVATController.logout()
     elif status == 'OD_Initialized':
         cvat_cookie = CVATController.login()
         project = record.project
