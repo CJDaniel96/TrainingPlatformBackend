@@ -236,6 +236,6 @@ class CategorizeDataProcessing:
         with open(txt_file, 'r') as f:
             for line_data in f.readlines():
                 class_number = int(line_data.split(' ')[0])
-                if class_dict[class_number] not in ok_category:
+                if list(class_dict.keys())[list(class_dict.values()).index(0)] not in ok_category:
                     return 'NG'
             return 'OK'
