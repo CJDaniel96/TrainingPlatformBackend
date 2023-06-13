@@ -235,7 +235,7 @@ class CategorizeDataProcessing:
     def check_image_result(cls, ok_category, class_dict, txt_file):
         with open(txt_file, 'r') as f:
             for line_data in f.readlines():
-                class_number = line_data.split(' ')[0]
+                class_number = int(line_data.split(' ')[0])
                 if class_dict[class_number] not in ok_category:
                     return 'NG'
             return 'OK'
