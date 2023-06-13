@@ -13,7 +13,7 @@ class CategorizeController:
         Logger.info('Upload Database Record Crop Categorizing')
         images = CategorizeDataProcessing.get_images(train_data_folder)
         for image_path in images:
-            image_uuid = ImageDataService.get_image_uuid(image_path, group_type)
+            image_uuid = ImageDataService.get_image_uuid(image_path)
             image = YOLOInference.read_image(image_path)
             image_size = YOLOInference.get_image_size(image)
 
