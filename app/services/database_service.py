@@ -3,7 +3,7 @@ import json
 import os
 import random
 import uuid
-from app.config import IRI_RECORD_STATUS, SITE, URD_RECORD_STATUS
+from app.config import IRI_RECORD_STATUS, SITE, SMART_FILTER_NUMBER, URD_RECORD_STATUS
 from app.services.logging_service import Logger
 from data.config import DATABASES
 from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CategoryMapping, CriticalNg, CropCategorizingRecord, ImagePool, IriRecord, ODTrainingInfo, UploadData, UrdRecord
@@ -182,7 +182,7 @@ class ImagePoolService:
 
         random.shuffle(buffer)
 
-        for data in buffer[:100]:
+        for data in buffer[:SMART_FILTER_NUMBER]:
             if data[0] not in dataset:
                 dataset[data[0]] = [data[1]]
             else:
