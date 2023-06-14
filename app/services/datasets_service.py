@@ -225,6 +225,10 @@ class CategorizeDataProcessing:
     @classmethod
     def get_images(cls, train_data_folder, image_type='*.jpg'):
         return glob(os.path.join(train_data_folder, 'images', 'train', image_type))
+    
+    @classmethod
+    def get_object_detection_basicline_image_names(cls, project):
+        return os.listdir(os.path.join(OBJECT_DETECTION_BASICLINE_DATASETS_DIR, project, 'images', 'train'))
 
     @classmethod
     def get_image_txt_file(cls, image_path, txt_type='.txt'):
