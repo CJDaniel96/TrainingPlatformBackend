@@ -15,7 +15,7 @@ class CategorizeController:
         images = CategorizeDataProcessing.get_images(train_data_folder)
         basicline_image_names = CategorizeDataProcessing.get_object_detection_basicline_image_names(project)
         for image_path in images:
-            if os.path.basename(image_path) in basicline_image_names:
+            if os.path.basename(image_path) not in basicline_image_names:
                 image_uuid = ImageDataService.get_image_uuid(image_path)
                 image = YOLOInference.read_image(image_path)
                 image_size = YOLOInference.get_image_size(image)
