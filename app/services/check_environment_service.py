@@ -180,8 +180,13 @@ class ClearLocalDataset:
     def clear_object_detection_local_dataset(cls, project, task_name):
         if os.path.exists(os.path.join(OBJECT_DETECTION_TRAIN_DATASETS_DIR, project, task_name)):
             shutil.rmtree(os.path.join(OBJECT_DETECTION_TRAIN_DATASETS_DIR, project, task_name), ignore_errors=True)
+            shutil.rmtree(os.path.join(OBJECT_DETECTION_TRAIN_DATASETS_DIR, project, task_name + '_inference'), ignore_errors=True)
         if os.path.exists(os.path.join(CLASSIFICATION_TRAIN_DATASETS_DIR, project, task_name)):
             shutil.rmtree(os.path.join(CLASSIFICATION_TRAIN_DATASETS_DIR, project, task_name), ignore_errors=True)
+        if os.path.exists(os.path.join(YOLO_TRAIN_MODEL_DIR, project, task_name)):
+            shutil.rmtree(os.path.join(YOLO_TRAIN_MODEL_DIR, project, task_name), ignore_errors=True)
+        if os.path.exists(os.path.join(OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, project, task_name)):
+            shutil.rmtree(os.path.join(OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, project, task_name), ignore_errors=True)
         if os.path.exists(os.path.join(MOBILENET_TRAIN_MODEL_DIR, project, task_name)):
             shutil.rmtree(os.path.join(MOBILENET_TRAIN_MODEL_DIR, project, task_name), ignore_errors=True)
 
