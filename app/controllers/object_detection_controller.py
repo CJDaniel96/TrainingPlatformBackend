@@ -56,7 +56,6 @@ class ObjectDetectionController:
     @classmethod
     def validate(cls, project, task_name):
         Logger.info('YOLO Validating Start...')
-        final_answer=True
         if project == 'NK_DAOI_CHIPRC_2':
             model_file = CHIPRCInference.get_train_model_path(project, task_name)
             model = CHIPRCInference.load_model(model_file)
@@ -70,12 +69,17 @@ class ObjectDetectionController:
             criterion = CHIPRCInference.get_criterion()
 
             validation_images = CHIPRCInference.get_validation_images(project)
+            validation_count = CHIPRCInference.check_validation_count(validation_images)
             underkill_folder = CHIPRCInference.get_underkill_folder(project, task_name)
+            
+            underkill_count = 0
             for validation_image in validation_images:
                 answer, chiprcs = CHIPRCInference.yolo_predict(model, validation_image)
                 if answer and CHIPRCInference.vae_predict(validation_image, chiprcs, transform, generator, discriminator, encoder, criterion):
-                    final_answer = False
+                    underkill_count += 1
                     CHIPRCInference.output_underkill_image(validation_image, underkill_folder)
+
+            final_answer = CHIPRCInference.check_validation_result(underkill_count, validation_count)
 
             return final_answer
         
@@ -88,11 +92,16 @@ class ObjectDetectionController:
             pinlocation_model = PCIEInference.get_pinlocation_model(pinlocation_model_path)
 
             validation_images = PCIEInference.get_validation_images(project)
+            validation_count = CHIPRCInference.check_validation_count(validation_images)
             underkill_folder = PCIEInference.get_underkill_folder(project, task_name)
+
+            underkill_count = 0
             for validation_image in validation_images:
                 answer = PCIEInference.classification_inference(validation_image, classification_model)
                 if answer and PCIEInference.object_detection_inference(model, pinlocation_model, validation_image):
-                    final_answer = False
+                    underkill_count += 1
                     PCIEInference.output_underkill_image(validation_image, underkill_folder)
+
+            final_answer = PCIEInference.check_validation_result(underkill_count, validation_count)
 
             return final_answer

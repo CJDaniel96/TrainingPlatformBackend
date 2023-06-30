@@ -205,6 +205,17 @@ class YOLOInference:
         dst_path = os.path.abspath(os.path.join(underkill_folder, image_name))
         shutil.copyfile(image_path, dst_path)
 
+    @classmethod
+    def check_validation_count(cls, images):
+        return len(images)
+
+    @classmethod
+    def check_validation_result(cls, underkill_count, validation_count, underkill_rate=0.001):
+        if underkill_count / validation_count > underkill_rate:
+            return False
+        else:
+            return True
+
 
 class CHIPRCInference(YOLOInference):
     def __init__(self) -> None:
