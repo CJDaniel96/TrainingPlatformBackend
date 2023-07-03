@@ -30,14 +30,14 @@ class UnderkillDataProcessing:
     
     @classmethod
     def get_object_detection_validations(cls, project, task_name):
-        validation_folder = os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project, task_name)
+        validation_folder = os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project, 'images')
         validations = glob(os.path.join(validation_folder, '*.jpg'))
 
         return validations
 
     @classmethod
     def get_classification_validations(cls, project, task_name):
-        validation_folder = os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, task_name)
+        validation_folder = os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, 'images')
         validations = glob(os.path.join(validation_folder, '*.jpg'))
 
         return validations
