@@ -1,6 +1,6 @@
 import shutil
 from app.config import YOLO_TRAIN_MODEL_DIR
-from data.config import OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, ORIGIN_DATASETS_FOLDER_PROFIX, ORIGIN_DATASETS_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR
+from data.config import CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, ORIGIN_DATASETS_FOLDER_PROFIX, ORIGIN_DATASETS_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR
 from datetime import datetime
 from glob import glob
 import os
@@ -27,6 +27,27 @@ class UnderkillDataProcessing:
         underkills = glob(os.path.join(underkill_folder, '*.jpg'))
 
         return underkills
+    
+    @classmethod
+    def get_object_detection_validations(cls, project, task_name):
+        validation_folder = os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project, task_name)
+        validations = glob(os.path.join(validation_folder, '*.jpg'))
+
+        return validations
+
+    @classmethod
+    def get_classification_validations(cls, project, task_name):
+        validation_folder = os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, task_name)
+        validations = glob(os.path.join(validation_folder, '*.jpg'))
+
+        return validations
+    
+    @classmethod
+    def check_model_pass_or_fail(cls, underkills, validations, underkill_rate=0.001):
+        if len(underkills) / len(validations) > underkill_rate:
+            return False
+        else:
+            return True
     
     @classmethod
     def get_loss(cls, project, task_name):
