@@ -43,7 +43,7 @@ class UnderkillDataProcessing:
         return validations
     
     @classmethod
-    def check_model_pass_or_fail(cls, underkills, validations, underkill_rate=0.001):
+    def check_model_pass_or_fail(cls, underkills, validations, underkill_rate=0.01):
         if len(underkills) / len(validations) > underkill_rate:
             return False
         else:

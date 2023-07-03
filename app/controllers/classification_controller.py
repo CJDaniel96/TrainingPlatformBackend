@@ -31,7 +31,8 @@ class ClassificationController:
         if object_detection_underkills and classification_underkills:
             ...
         elif object_detection_underkills:
-            return object_detection_underkills, False
+            result = UnderkillDataProcessing.check_model_pass_or_fail(object_detection_underkills, object_detection_validations)
+            return object_detection_underkills, result
         else:
             return [], True
 

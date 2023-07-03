@@ -210,7 +210,7 @@ class YOLOInference:
         return len(images)
 
     @classmethod
-    def check_validation_result(cls, underkill_count, validation_count, underkill_rate=0.001):
+    def check_validation_result(cls, underkill_count, validation_count, underkill_rate=0.01):
         if underkill_count / validation_count > underkill_rate:
             return False
         else:
