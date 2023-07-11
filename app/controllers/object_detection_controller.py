@@ -1,3 +1,4 @@
+from app.config import TRAINING_FLOW
 from app.services.database_service import CategoryMappingService, IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.datasets_service import ObjectDetectionTrainDataProcessing
 from app.services.inference_service import CHIPRCInference, PCIEInference, YOLOInference
@@ -6,6 +7,14 @@ from app.services.train_service import YOLOTrain
 
 
 class ObjectDetectionController:
+    @classmethod
+    def check_coutinue_train_classification_model(cls, project):
+        Logger.info('Check Whether Train Object Detection Model')
+        if 'object_detection' in TRAINING_FLOW[project]:
+            return True
+        else:
+            return False
+
     @classmethod
     def get_object_detection_tasks(cls, task_id, group_type, tablename):
         tasks_id = TrainingInfoService.get_object_detection_tasks_id(task_id, group_type)
@@ -24,7 +33,7 @@ class ObjectDetectionController:
             ObjectDetectionTrainDataProcessing.get_object_detection_train_data(train_data_folder)
             ObjectDetectionTrainDataProcessing.clear_zip_file(task_zip_file)
 
-            return
+        return
         
     @classmethod
     def merge_basicline_dataset(cls, train_data_folder, project):

@@ -1,10 +1,12 @@
 import pickle
+import re
 import shutil
 import os
 import torch
 import torch.nn as nn
 import cv2
 import numpy as np
+from app.mobilenet_v2.inference import run as mobilenet_inference
 from app.services.model_service import Discriminator, Encoder, Generator
 from xml.dom.minidom import Document
 from glob import glob
@@ -12,8 +14,8 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from PIL import Image
 from torch.nn import functional as F
-from app.config import CLASSIFICATION_INFERNCE_MODEL_DIR, GAN_INFERENCE_MODEL_DIR, OBJECT_DETECTION_PCIE_BODY_THRESHOLD, OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES, OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS, OBJECT_DETECTION_PCIE_PART_NUMBER, OBJECT_DETECTION_PCIE_PCIE_THRESHOLD, OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME, OBJECT_DETECTION_PCIE_WAYS, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR, YOLOV5_DIR, OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN, OBJECT_DETECTION_PCIE_CLASSIFICATION_STD
-from data.config import OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR
+from app.config import CLASSIFICATION_INFERNCE_MODEL_DIR, GAN_INFERENCE_MODEL_DIR, MOBILENET_TRAIN_MODEL_DIR, MOBILENETV2_CONFIDENCE, OBJECT_DETECTION_PCIE_BODY_THRESHOLD, OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES, OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS, OBJECT_DETECTION_PCIE_PART_NUMBER, OBJECT_DETECTION_PCIE_PCIE_THRESHOLD, OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME, OBJECT_DETECTION_PCIE_WAYS, UNDERKILL_RATE, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR, YOLOV5_DIR, OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN, OBJECT_DETECTION_PCIE_CLASSIFICATION_STD
+from data.config import CLASSIFICATION_TRAIN_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR
 
 
 class YOLOInference:
@@ -211,6 +213,103 @@ class YOLOInference:
 
     @classmethod
     def check_validation_result(cls, underkill_count, validation_count, underkill_rate=0.01):
+        if underkill_count / validation_count > underkill_rate:
+            return False
+        else:
+            return True
+
+
+class MobileNetInference:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def load_model(cls, model_path):
+        return torch.load(model_path, map_location=cls().device)
+
+    @classmethod
+    def device(cls):
+        return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    @classmethod
+    def predict(cls, image_path, model, class_list, data_transforms):
+        image = Image.open(image_path).convert("RGB")
+        input_tensor = data_transforms(image)
+        input_batch = input_tensor.unsqueeze(0).to(cls().device)
+
+        with torch.no_grad():
+            output = model(input_batch)
+
+        prediction = torch.nn.functional.softmax(output[0], dim=0)
+        predicted_score = prediction.amax().item()
+        predicted_class = prediction.argmax().item()
+
+        if predicted_score > MOBILENETV2_CONFIDENCE:
+            class_name = class_list[predicted_class]
+        elif 'NG' in class_list:
+            class_name = 'NG'
+        else:
+            class_name = 'other'
+
+        return class_name
+
+    @classmethod
+    def get_train_model_path(cls, project, task_name):
+        return os.path.join(MOBILENET_TRAIN_MODEL_DIR, project, task_name, 'best.pt')
+
+    @classmethod
+    def get_transform(cls, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
+        return transforms.Compose([
+        transforms.Resize((224, 224)), 
+        transforms.ToTensor(), 
+        transforms.Normalize(
+            mean=mean,
+            std=std
+        )
+    ])
+
+    @classmethod
+    def get_classes(cls, project, task_name):
+        classes_file = os.path.join(CLASSIFICATION_TRAIN_DATASETS_DIR, project, task_name, 'classes.txt')
+        class_list = []
+        with open(classes_file, 'r') as f:
+            for class_name in f.readlines():
+                class_list.append(class_name.strip())
+
+        return class_list
+
+    @classmethod
+    def get_mean_std(cls, project, task_name):
+        mean_std_file = os.path.join(CLASSIFICATION_TRAIN_DATASETS_DIR, project, task_name, 'mean_std.txt')
+        with open(mean_std_file, 'r') as f:
+            mean = eval(re.search('[[].*[]]', f.readline())[0])
+            std = eval(re.search('[[].*[]]', f.readline())[0])
+
+        return mean, std
+
+    @classmethod
+    def get_validation_images(cls, project):
+        return glob(os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, '**', '*.jpg'), recursive=True)
+    
+    @classmethod
+    def check_validation_count(cls, images):
+        return len(images)
+    
+    @classmethod
+    def get_underkill_folder(cls, project, task_name):
+        dst_folder = os.path.join(CLASSIFICATION_UNDERKILL_DATASETS_DIR, project, task_name)
+        cls().check_folder(dst_folder)
+        
+        return dst_folder
+    
+    @classmethod
+    def output_underkill_image(cls, image_path, underkill_folder):
+        image_name = os.path.basename(image_path)
+        dst_path = os.path.abspath(os.path.join(underkill_folder, image_name))
+        shutil.copyfile(image_path, dst_path)
+
+    @classmethod
+    def check_validation_result(cls, underkill_count, validation_count, underkill_rate=UNDERKILL_RATE):
         if underkill_count / validation_count > underkill_rate:
             return False
         else:

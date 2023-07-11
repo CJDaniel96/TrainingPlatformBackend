@@ -1,6 +1,6 @@
 import shutil
 from app.config import YOLO_TRAIN_MODEL_DIR
-from data.config import CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, ORIGIN_DATASETS_FOLDER_PROFIX, ORIGIN_DATASETS_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR
+from data.config import CLASSIFICATION_BASICLINE_DATASETS_DIR, CLASSIFICATION_TRAIN_DATASETS_DIR, CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, ORIGIN_DATASETS_FOLDER_PROFIX, ORIGIN_DATASETS_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR
 from datetime import datetime
 from glob import glob
 import os
@@ -241,6 +241,48 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
     def get_hyps_yaml(cls, project):
         return os.path.join(YOLO_TRAIN_HYPS_YAML_DIR, project + '.yaml')
     
+
+class ClassificationTrainDataProcessing(TrainDataProcessing):
+    def __init__(self) -> None:
+        super().__init__()
+
+    @classmethod
+    def get_classification_train_data_folder(cls, project, task_name):
+        return os.path.join(CLASSIFICATION_TRAIN_DATASETS_DIR, project, task_name)
+    
+    @classmethod
+    def get_classification_train_data(cls, train_data_folder):
+        train_data_dir = 'default'
+
+        for class_folder in os.listdir(train_data_dir):
+            shutil.copytree(os.path.join(train_data_dir, class_folder), os.path.join(train_data_folder, 'train', class_folder))
+
+        if os.path.isdir(train_data_dir):
+            shutil.rmtree(train_data_dir)
+        if os.path.isdir('bb_landmark'):
+            shutil.rmtree('bb_landmark')
+        if os.path.isfile('labels.txt'):
+            os.remove('labels.txt')
+
+    @classmethod
+    def merge_classification_basicline_data(cls, train_data_folder, project):
+        basicline_dataset = os.path.abspath(os.path.join(CLASSIFICATION_BASICLINE_DATASETS_DIR, project))
+        images_basicline_folder = os.listdir(basicline_dataset, 'images')
+
+        if images_basicline_folder:
+            for dataset in os.listdir(images_basicline_folder):
+                for folder in os.listdir(images_basicline_folder, dataset):
+                    try:
+                        shutil.copytree(
+                            os.path.join(images_basicline_folder, dataset, folder), 
+                            os.path.join(train_data_folder, dataset, folder), 
+                            dirs_exist_ok=True
+                        )
+                    except:
+                        long_src_path = '\\\\?\\' + os.path.join(images_basicline_folder, dataset, folder)
+                        long_dst_path = '\\\\?\\' + os.path.join(train_data_folder, dataset, folder)
+                        shutil.copytree(long_src_path, long_dst_path, dirs_exist_ok=True)
+
 
 class CategorizeDataProcessing:
     @classmethod

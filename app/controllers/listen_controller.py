@@ -63,6 +63,14 @@ class Listener:
             URDRecordService.update_od_training_status(id, training_status)
 
     @classmethod
+    def update_record_classification_training_status(cls, tablename, id, training_status):
+        Logger.info('Update Database Record Classification Training Status')
+        if tablename == 'iri_record':
+            IRIRecordService.update_cls_training_status(id, training_status)
+        elif tablename == 'urd_record':
+            URDRecordService.update_cls_training_status(id, training_status)
+
+    @classmethod
     def update_record_object_detection_training_info(cls, result, task_id, comp_type):
         Logger.info('Update Database Record Object Detection Training Information')
         if result:
@@ -78,6 +86,23 @@ class Listener:
             model_version = None
             
         TrainingInfoService.insert_object_detection_result(task_id, comp_type, val_status, model_version)
+
+    @classmethod
+    def update_record_classification_training_info(cls, result, task_id, comp_type):
+        Logger.info('Update Database Record Object Detection Training Information')
+        if result:
+            val_status = 'APPROVE'
+            model_version = TrainingInfoService.get_classification_model_version(comp_type, val_status)
+
+            if model_version:
+                model_version = int(model_version) + 1
+            else:
+                model_version = 1
+        else:
+            val_status = 'FAIL'
+            model_version = None
+
+        TrainingInfoService.insert_classification_result(task_id, comp_type, val_status, model_version)
 
     @classmethod
     def update_category_ready(cls, id):

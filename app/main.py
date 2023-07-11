@@ -83,32 +83,33 @@ def app_run():
         group_type = record.group_type
         site = record.site
 
-        CheckEnvironmentController.clear_local_data(status, project, task_name)
+        if ObjectDetectionController.check_coutinue_train_classification_model(project):
+            CheckEnvironmentController.clear_local_data(status, project, task_name)
 
-        Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['TRIGGER_TRAINING_FOR_OD'])
-        task_zip_file = CVATController.download(task_id, task_name, cvat_cookie)
-        train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
-        ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
-        
-        tasks = ObjectDetectionController.get_object_detection_tasks(task_id, group_type, tablename)
-        if tasks:
-            for id, name in tasks:
-                task_zip_file = CVATController.download(id, name, cvat_cookie)
-                train_data_folder = ObjectDetectionController.get_train_dataset(task_zip_file, project, task_name)
-        ObjectDetectionController.merge_basicline_dataset(train_data_folder, project)
+            Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['TRIGGER_TRAINING_FOR_OD'])
+            task_zip_file = CVATController.download(task_id, task_name, cvat_cookie)
+            train_data_folder = ObjectDetectionController.get_train_data_folder(project, task_name)
+            ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
+            
+            tasks = ObjectDetectionController.get_object_detection_tasks(task_id, group_type, tablename)
+            if tasks:
+                for id, name in tasks:
+                    task_zip_file = CVATController.download(id, name, cvat_cookie)
+                    train_data_folder = ObjectDetectionController.get_train_dataset(task_zip_file, project, task_name)
+            ObjectDetectionController.merge_basicline_dataset(train_data_folder, project)
 
-        Listener.update_record_object_detection_training_status(tablename, id, TRAINING_STATUS['RUNNING'])
-        
-        data_yaml = ObjectDetectionController.get_data_yaml(site, group_type, project, train_data_folder)
-        models_yaml = ObjectDetectionController.get_models_yaml(project)
+            Listener.update_record_object_detection_training_status(tablename, id, TRAINING_STATUS['RUNNING'])
+            
+            data_yaml = ObjectDetectionController.get_data_yaml(site, group_type, project, train_data_folder)
+            models_yaml = ObjectDetectionController.get_models_yaml(project)
 
-        Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['TRAINING_FOR_OD'])
-        ObjectDetectionController.train(project, task_name, data_yaml, models_yaml)
+            Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['TRAINING_FOR_OD'])
+            ObjectDetectionController.train(project, task_name, data_yaml, models_yaml)
 
-        Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['VERIFYING_FOR_OD'])
-        result = ObjectDetectionController.validate(project, task_name)
-        Listener.update_record_object_detection_training_info(result, task_id, group_type)
-        Listener.update_record_object_detection_training_status(tablename, id, TRAINING_STATUS['DONE'])
+            Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['VERIFYING_FOR_OD'])
+            result = ObjectDetectionController.validate(project, task_name)
+            Listener.update_record_object_detection_training_info(result, task_id, group_type)
+            Listener.update_record_object_detection_training_status(tablename, id, TRAINING_STATUS['DONE'])
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['FINISH_FOR_OD'])
         CVATController.logout()
     elif status == 'CLS_Initialized':
@@ -120,21 +121,47 @@ def app_run():
         group_type = record.group_type
         if ClassificationController.check_coutinue_train_classification_model(project):
             ...
+        elif ClassificationController.check_only_train_classification_model(project):
+            CheckEnvironmentController.clear_local_data(status, project, task_name)
+            Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['TRIGGER_TRAINING_FOR_CLS'])
+            task_zip_file = CVATController.download(task_id, task_name, cvat_cookie, 'classification')
+            train_data_folder = ClassificationController.get_train_data_folder(project, task_name)
+            ClassificationController.get_train_dataset(task_zip_file, train_data_folder)
+
+            tasks = ClassificationController.get_classification_tasks(task_id, group_type, tablename)
+            if tasks:
+                for id, name in tasks:
+                    task_zip_file = CVATController.download(id, name, cvat_cookie)
+                    train_data_folder = ClassificationController.get_train_dataset(task_zip_file, project, task_name)
+            ClassificationController.merge_basicline_dataset(train_data_folder, project)
+
+            Listener.update_record_classification_training_status(tablename, id, TRAINING_STATUS['RUNNING'])
+            Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['TRAINING_FOR_CLS'])
+
+            ClassificationController.train(project, task_name, train_data_folder)
+
+            Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['VERIFYING_FOR_CLS'])
+
+            result = ClassificationController.validate(project, task_name)
+            Listener.update_record_classification_training_info(result, task_id, group_type)
+            Listener.update_record_classification_training_status(tablename, id, TRAINING_STATUS['DONE'])
+
+            train_model_path = ClassificationController.get_train_model_path(project, task_name)
         else:
             train_dataset_inference_task_name = CVATController.custom_task_name(task_name, 'inference')
             task_zip_file = CVATController.download(task_id, train_dataset_inference_task_name, cvat_cookie)
             train_data_folder = ObjectDetectionController.get_train_data_folder(project, train_dataset_inference_task_name)
             ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
 
-            yolo_train_model_path = YOLOInferenceController.get_train_model_path(project, task_name)
-            train_dataset_inference_image_folder, train_dataset_inference_xml_folder = YOLOInferenceController.train_dataset_inference(project, task_name, yolo_train_model_path, train_data_folder)
+            train_model_path = YOLOInferenceController.get_train_model_path(project, task_name)
+            train_dataset_inference_image_folder, train_dataset_inference_xml_folder = YOLOInferenceController.train_dataset_inference(project, task_name, train_model_path, train_data_folder)
             train_dataset_inference_task_id = CVATController.upload(train_dataset_inference_image_folder, train_dataset_inference_xml_folder, project_id, train_dataset_inference_task_name, cvat_cookie)
 
-            finetune_type = ClassificationController.get_finetune_type(tablename)
-            underkills, result = ClassificationController.check_underkills(project, task_name)
-            crop_image_ids = ClassificationController.upload_crop_categorizing(underkills, group_type, id, finetune_type)
-            model_id = ClassificationController.upload_ai_model_information(yolo_train_model_path, id, finetune_type, group_type, result)
-            ClassificationController.upload_ai_model_performance(project, task_name, model_id, underkills, yolo_train_model_path, crop_image_ids, train_dataset_inference_task_id)
+        finetune_type = ClassificationController.get_finetune_type(tablename)
+        underkills, result = ClassificationController.check_underkills(project, task_name)
+        crop_image_ids = ClassificationController.upload_crop_categorizing(underkills, group_type, id, finetune_type)
+        model_id = ClassificationController.upload_ai_model_information(train_model_path, id, finetune_type, group_type, result)
+        ClassificationController.upload_ai_model_performance(project, task_name, model_id, underkills, train_model_path, crop_image_ids, train_dataset_inference_task_id)
             
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['FINISHED'])
         CVATController.logout()

@@ -1,6 +1,6 @@
 import os
 from urllib.parse import quote, urlencode, urljoin
-from app.config import CVAT_ANNOTATION_FORMAT, CVAT_DOWNLOAD_FORMAT, CVAT_LOGIN_API, CVAT_LOGIN_INFORMATION, CVAT_LOGOUT_API, CVAT_TASKS_ANNOTATION_API, CVAT_TASKS_DATA_API, CVAT_TASKS_DATASET_API, CVAT_TASKS_STATUS_API, CVAT_UPLOAD_INFORMATION, CVAT_URL, CVAT_TASKS_API
+from app.config import CVAT_ANNOTATION_FORMAT, CVAT_CLASSIFICATION_FORMAT, CVAT_DOWNLOAD_FORMAT, CVAT_LOGIN_API, CVAT_LOGIN_INFORMATION, CVAT_LOGOUT_API, CVAT_TASKS_ANNOTATION_API, CVAT_TASKS_DATA_API, CVAT_TASKS_DATASET_API, CVAT_TASKS_STATUS_API, CVAT_UPLOAD_INFORMATION, CVAT_URL, CVAT_TASKS_API
 import requests
 
 from data.config import TMP_DIR
@@ -85,11 +85,18 @@ class CVATService:
                 return
 
     @classmethod
-    def task_download(cls, task_id, task_name, auth_header):
+    def check_task_download_format(cls, task_type):
+        if task_type == 'object_detection':
+            return CVAT_DOWNLOAD_FORMAT
+        elif task_type == 'classification':
+            return CVAT_CLASSIFICATION_FORMAT
+
+    @classmethod
+    def task_download(cls, task_id, task_name, auth_header, format=CVAT_DOWNLOAD_FORMAT):
         download_url = urljoin(CVAT_URL, CVAT_TASKS_DATASET_API).format(task_id)
         parameters = {
             'action': 'download', 
-            'format': CVAT_DOWNLOAD_FORMAT,
+            'format': format,
             'filename': task_name
         }
         parameters = urlencode(parameters, quote_via=quote)

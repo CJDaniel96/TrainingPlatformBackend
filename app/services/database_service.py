@@ -315,11 +315,35 @@ class TrainingInfoService:
             return data.model_version
         else:
             return '0'
+
+    @classmethod
+    def get_classification_model_version(cls, comp_type, val_status):
+        with create_session(AI) as session:
+            data = session.query(CLSTrainingInfo).filter(
+                CLSTrainingInfo.comp_type == comp_type,
+                CLSTrainingInfo.val_status == val_status
+            ).order_by(CLSTrainingInfo.model_version.desc()).first()
+
+        if data:
+            return data.model_version
+        else:
+            return '0'
         
     @classmethod
     def insert_object_detection_result(cls, task_id, comp_type, val_status, model_version): 
         with create_session(AI) as session:
             session.add(ODTrainingInfo(
+                task_id=task_id,
+                comp_type=comp_type,
+                val_status=val_status,
+                model_version=model_version
+            ))
+            session.commit()
+
+    @classmethod
+    def insert_classification_result(cls, task_id, comp_type, val_status, model_version):
+        with create_session(AI) as session:
+            session.add(CLSTrainingInfo(
                 task_id=task_id,
                 comp_type=comp_type,
                 val_status=val_status,

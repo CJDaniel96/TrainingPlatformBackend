@@ -1,4 +1,3 @@
-import time
 from app.services.cvat_service import CVATService
 from app.services.datasets_service import OriginDataProcessing
 from app.services.logging_service import Logger
@@ -47,9 +46,10 @@ class CVATController:
         return task_id
 
     @classmethod
-    def download(cls, task_id, task_name, token):
+    def download(cls, task_id, task_name, token, task_type='object_detection'):
         Logger.info('Download Data From CVAT')
         auth_header = CVATService.get_auth_header(token)
-        task_zip_file = CVATService.task_download(task_id, task_name, auth_header)
+        format = CVATService.check_task_download_format(task_type)
+        task_zip_file = CVATService.task_download(task_id, task_name, auth_header, format)
 
         return task_zip_file

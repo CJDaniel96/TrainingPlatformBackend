@@ -1,8 +1,9 @@
-from app.config import TRAINING_FLOW
-from app.services.database_service import AIModelInformationService, AIModelPerformanceService, CriticalNGService, CropCategorizingRecordService
-from app.services.datasets_service import UnderkillDataProcessing
-from app.services.inference_service import YOLOInference
+from app.config import MOBILENET_TRAIN_MODEL_DIR, TRAINING_FLOW
+from app.services.database_service import AIModelInformationService, AIModelPerformanceService, CriticalNGService, CropCategorizingRecordService, IRIRecordService, TrainingInfoService, URDRecordService
+from app.services.datasets_service import ClassificationTrainDataProcessing, UnderkillDataProcessing
+from app.services.inference_service import MobileNetInference, YOLOInference
 from app.services.logging_service import Logger
+from app.services.train_service import MobileNetV2Train
 
 
 class ClassificationController:
@@ -10,12 +11,74 @@ class ClassificationController:
         pass
 
     @classmethod
-    def check_coutinue_train_classification_model(cls, project):
+    def check_only_train_classification_model(cls, project):
         Logger.info('Check Whether Train Classification Model')
         if 'classification' in TRAINING_FLOW[project]:
             return True
         else:
             return False
+
+    @classmethod
+    def check_coutinue_train_classification_model(cls, project):
+        Logger.info('Check Whether Train Classification Model')
+        if 'object_detection' in TRAINING_FLOW[project] and 'classification' in TRAINING_FLOW[project]:
+            return True
+        else:
+            return False
+        
+    @classmethod
+    def get_train_data_folder(cls, project, task_name):
+        return ClassificationTrainDataProcessing.get_classification_train_data_folder(project, task_name)
+    
+    @classmethod
+    def get_train_dataset(cls, task_zip_file, train_data_folder):
+        if ClassificationTrainDataProcessing.check_zip_file(task_zip_file):
+            ClassificationTrainDataProcessing.get_classification_train_data(train_data_folder)
+            ClassificationTrainDataProcessing.clear_zip_file(task_zip_file)
+
+        return
+    
+    @classmethod
+    def get_classification_tasks(cls, task_id, group_type, tablename):
+        tasks_id = TrainingInfoService.get_classification_tasks_id(task_id, group_type)
+        if tablename == 'iri_record':
+            return IRIRecordService.get_tasks(tasks_id)
+        elif tablename == 'urd_record':
+            return URDRecordService.get_tasks(tasks_id)
+
+    @classmethod
+    def merge_basicline_dataset(cls, train_data_folder, project):
+        Logger.info('Merge Local Basicline Dataset in Train Dataset')
+        ClassificationTrainDataProcessing.merge_classification_basicline_data(train_data_folder, project)
+
+    @classmethod
+    def train(cls, project, task_name, data):
+        Logger.info('MobileNet V2 Training Start...')
+        MobileNetV2Train.train_model(project, task_name, data)
+
+    @classmethod
+    def validate(cls, project, task_name):
+        Logger.info('MobilNet V2 Validating Start...')
+        model_file = MobileNetInference.get_train_model_path(project, task_name)
+        model = MobileNetInference.load_model(model_file)
+        mean, std = MobileNetInference.get_mean_std(project, task_name)
+        data_transforms = MobileNetInference.get_transform(mean, std)
+        class_list = MobileNetInference.get_classes(project, task_name)
+
+        validation_images = MobileNetInference.get_validation_images(project)
+        validation_count = MobileNetInference.check_validation_count(validation_images)
+        underkill_folder = MobileNetInference.get_underkill_folder(project, task_name)
+
+        underkill_count = 0
+        for validation_image in validation_images:
+            answer = MobileNetInference.predict(validation_image, model, class_list, data_transforms)
+            if answer:
+                underkill_count += 1
+                MobileNetInference.output_underkill_image(validation_image, underkill_folder)
+        
+        final_answer = MobileNetInference.check_validation_result(underkill_count, validation_count)
+
+        return final_answer
 
     @classmethod
     def get_finetune_type(cls, tablename):
@@ -36,9 +99,10 @@ class ClassificationController:
                 return [], result
             else:
                 return object_detection_underkills, result
+        elif classification_validations:
+            ...
         else:
             return [], True
-
         
     @classmethod
     def upload_crop_categorizing(cls, images, group_type, record_id, finetune_type):

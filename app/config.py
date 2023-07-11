@@ -96,6 +96,8 @@ CVAT_ANNOTATION_FORMAT = 'PASCAL VOC 1.1'
 
 CVAT_DOWNLOAD_FORMAT = 'YOLO 1.1'
 
+CVAT_CLASSIFICATION_FORMAT = 'VGGFace2 1.0'
+
 CVAT_UPLOAD_INFORMATION = {'image_quality': 70}
 
 # YOLOv5 Settings
@@ -107,6 +109,9 @@ YOLOV5_BATCH_SIZE = 8
 YOLOV5_EPOCHS = 300
 
 # Training Flow Settings
+# Only Selection as Following
+# 1. object_detection
+# 2. classification
 
 TRAINING_FLOW = {
     'NK_DAOI_CHIPRC_2': ['object_detection'],
@@ -141,3 +146,15 @@ OBJECT_DETECTION_PCIE_PCIE_THRESHOLD = 0.7
 OBJECT_DETECTION_PCIE_BODY_THRESHOLD = 0.7
 
 OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME = 'pcie_pinlocation_model.pkl'
+
+UNDERKILL_RATE = 0.01
+
+# Classification Settings
+
+# MobileNet V2 Settings
+
+MOBILENETV2_BATCH_SIZE = 64
+
+MOBILENETV2_EPOCHS = 40
+
+MOBILENETV2_CONFIDENCE = 0.9
