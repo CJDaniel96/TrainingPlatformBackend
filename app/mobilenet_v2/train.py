@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 from torchvision import datasets, transforms
-from torchvision.models import mobilenet_v2, MobileNet_V2_Weights
+from torchvision.models import mobilenet_v2
 from tqdm import tqdm
 
 
@@ -220,7 +220,7 @@ def run(data_dir, batch_size, save_dir, num_epochs):
     save_classes(data_dir, image_datasets)
     print(f'class names: {class_names}')
 
-    model_ft = mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)
+    model_ft = mobilenet_v2(weights='MobileNet_V2_Weights.DEFAULT')
     num_ftrs = model_ft.classifier[-1].in_features
     model_ft.classifier = nn.Sequential(
         nn.Dropout(p=0.2), 

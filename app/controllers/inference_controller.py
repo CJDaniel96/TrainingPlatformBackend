@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from app.services.logging_service import Logger
-from app.services.inference_service import YOLOInference, MobileNetInference
+from app.services.inference_service import YOLOInference, MobileNetGANInference
 from glob import glob
 
 
@@ -73,16 +73,16 @@ class YOLOInferenceController(InferenceController):
         return inference_image_folder, inferece_xml_folder
 
 
-class MobileNetInferenceController(InferenceController):
+class MobileNetGANInferenceController(InferenceController):
     def __init__(self) -> None:
         super().__init__()
 
     @classmethod
     def get_train_model_path(cls, project, task_name):
-        return MobileNetInference.get_train_model_path(project, task_name)
+        return MobileNetGANInference.get_train_model_path(project, task_name)
 
 
-class CHIPRCInferenceController(InferenceController):
+class YOLOFanoGANInferenceController(InferenceController):
     def __init__(self) -> None:
         super().__init__()
 

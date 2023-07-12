@@ -1,7 +1,7 @@
-from app.config import TRAINING_FLOW
+from app.config import TRAINING_FLOW, VALIDATION_FLOW
 from app.services.database_service import CategoryMappingService, IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.datasets_service import ObjectDetectionTrainDataProcessing
-from app.services.inference_service import CHIPRCInference, PCIEInference, YOLOInference
+from app.services.inference_service import YOLOFanoGANInference, MobileNetYOLOIForestInference, YOLOInference
 from app.services.logging_service import Logger
 from app.services.train_service import YOLOTrain
 
@@ -65,52 +65,77 @@ class ObjectDetectionController:
     @classmethod
     def validate(cls, project, task_name):
         Logger.info('YOLO Validating Start...')
-        if project == 'NK_DAOI_CHIPRC_2':
-            model_file = CHIPRCInference.get_train_model_path(project, task_name)
-            model = CHIPRCInference.load_model(model_file)
-            generator_model_file = CHIPRCInference.get_generator_model_path(project)
-            discriminator_model_file = CHIPRCInference.get_discriminator_model_path(project)
-            encoder_model_file = CHIPRCInference.get_encoder_model_path(project)
-            generator = CHIPRCInference.get_generator_model(generator_model_file)
-            discriminator = CHIPRCInference.get_discriminator_model(discriminator_model_file)
-            encoder = CHIPRCInference.get_encoder_model(encoder_model_file)
-            transform = CHIPRCInference.get_transform()
-            criterion = CHIPRCInference.get_criterion()
+        if project in VALIDATION_FLOW['yolo_fanogan']:
+            model_file = YOLOFanoGANInference.get_train_model_path(project, task_name)
+            model = YOLOFanoGANInference.load_model(model_file)
+            generator_model_file = YOLOFanoGANInference.get_generator_model_path(project)
+            discriminator_model_file = YOLOFanoGANInference.get_discriminator_model_path(project)
+            encoder_model_file = YOLOFanoGANInference.get_encoder_model_path(project)
+            generator = YOLOFanoGANInference.get_generator_model(generator_model_file)
+            discriminator = YOLOFanoGANInference.get_discriminator_model(discriminator_model_file)
+            encoder = YOLOFanoGANInference.get_encoder_model(encoder_model_file)
+            transform = YOLOFanoGANInference.get_transform()
+            criterion = YOLOFanoGANInference.get_criterion()
 
-            validation_images = CHIPRCInference.get_validation_images(project)
-            validation_count = CHIPRCInference.check_validation_count(validation_images)
-            underkill_folder = CHIPRCInference.get_underkill_folder(project, task_name)
+            validation_images = YOLOFanoGANInference.get_validation_images(project)
+            validation_count = YOLOFanoGANInference.check_validation_count(validation_images)
+            underkill_folder = YOLOFanoGANInference.get_underkill_folder(project, task_name)
+
+            kappa = VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['kappa']
+            anormaly_threshold = VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['anormaly_threshold']
+            confidence = VALIDATION_FLOW['mobilenetv2_fanogan'][project]['confidence']
             
             underkill_count = 0
             for validation_image in validation_images:
-                answer, chiprcs = CHIPRCInference.yolo_predict(model, validation_image)
-                if answer and CHIPRCInference.vae_predict(validation_image, chiprcs, transform, generator, discriminator, encoder, criterion):
+                answer, target_df = YOLOFanoGANInference.yolo_predict(model, validation_image, project, confidence)
+                if answer and YOLOFanoGANInference.vae_predict(
+                    validation_image, target_df, transform, generator, discriminator, encoder, criterion, kappa, anormaly_threshold
+                ):
                     underkill_count += 1
-                    CHIPRCInference.output_underkill_image(validation_image, underkill_folder)
+                    YOLOFanoGANInference.output_underkill_image(validation_image, underkill_folder)
 
-            final_answer = CHIPRCInference.check_validation_result(underkill_count, validation_count)
+            final_answer = YOLOFanoGANInference.check_validation_result(underkill_count, validation_count)
 
             return final_answer
-        
-        elif project == 'NK_PCIE_2':
-            model_file = PCIEInference.get_train_model_path(project, task_name)
-            classification_model_path = PCIEInference.get_classification_model_path(project)
-            pinlocation_model_path = PCIEInference.get_pinlocation_model_path(project)
-            model = PCIEInference.load_model(model_file)
-            classification_model = PCIEInference.get_classification_model(classification_model_path)
-            pinlocation_model = PCIEInference.get_pinlocation_model(pinlocation_model_path)
 
-            validation_images = PCIEInference.get_validation_images(project)
-            validation_count = CHIPRCInference.check_validation_count(validation_images)
-            underkill_folder = PCIEInference.get_underkill_folder(project, task_name)
+        elif project in VALIDATION_FLOW['yolo']:
+            model_file = YOLOFanoGANInference.get_train_model_path(project, task_name)
+            model = YOLOFanoGANInference.load_model(model_file)
+
+            validation_images = YOLOFanoGANInference.get_validation_images(project)
+            validation_count = YOLOFanoGANInference.check_validation_count(validation_images)
+            underkill_folder = YOLOFanoGANInference.get_underkill_folder(project, task_name)
 
             underkill_count = 0
             for validation_image in validation_images:
-                answer = PCIEInference.classification_inference(validation_image, classification_model)
-                if answer and PCIEInference.object_detection_inference(model, pinlocation_model, validation_image):
+                answer = YOLOFanoGANInference.yolo_predict(model, validation_image, project)
+                if answer:
                     underkill_count += 1
-                    PCIEInference.output_underkill_image(validation_image, underkill_folder)
+                    YOLOFanoGANInference.output_underkill_image(validation_image, underkill_folder)
 
-            final_answer = PCIEInference.check_validation_result(underkill_count, validation_count)
+            final_answer = YOLOFanoGANInference.check_validation_result(underkill_count, validation_count)
+
+            return final_answer
+        
+        elif project in VALIDATION_FLOW['mobilenetv2_yolo_iforest']:
+            model_file = MobileNetYOLOIForestInference.get_train_model_path(project, task_name)
+            classification_model_path = MobileNetYOLOIForestInference.get_classification_model_path(project)
+            pinlocation_model_path = MobileNetYOLOIForestInference.get_pinlocation_model_path(project)
+            model = MobileNetYOLOIForestInference.load_model(model_file)
+            classification_model = MobileNetYOLOIForestInference.get_classification_model(classification_model_path)
+            pinlocation_model = MobileNetYOLOIForestInference.get_pinlocation_model(pinlocation_model_path)
+
+            validation_images = MobileNetYOLOIForestInference.get_validation_images(project)
+            validation_count = YOLOFanoGANInference.check_validation_count(validation_images)
+            underkill_folder = MobileNetYOLOIForestInference.get_underkill_folder(project, task_name)
+
+            underkill_count = 0
+            for validation_image in validation_images:
+                answer = MobileNetYOLOIForestInference.classification_inference(validation_image, classification_model)
+                if answer and MobileNetYOLOIForestInference.object_detection_inference(model, pinlocation_model, validation_image):
+                    underkill_count += 1
+                    MobileNetYOLOIForestInference.output_underkill_image(validation_image, underkill_folder)
+
+            final_answer = MobileNetYOLOIForestInference.check_validation_result(underkill_count, validation_count)
 
             return final_answer

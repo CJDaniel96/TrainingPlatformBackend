@@ -14,7 +14,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from PIL import Image
 from torch.nn import functional as F
-from app.config import CLASSIFICATION_INFERNCE_MODEL_DIR, GAN_INFERENCE_MODEL_DIR, MOBILENET_TRAIN_MODEL_DIR, MOBILENETV2_CONFIDENCE, OBJECT_DETECTION_PCIE_BODY_THRESHOLD, OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES, OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS, OBJECT_DETECTION_PCIE_PART_NUMBER, OBJECT_DETECTION_PCIE_PCIE_THRESHOLD, OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME, OBJECT_DETECTION_PCIE_WAYS, UNDERKILL_RATE, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR, YOLOV5_DIR, OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN, OBJECT_DETECTION_PCIE_CLASSIFICATION_STD
+from app.config import CLASSIFICATION_INFERNCE_MODEL_DIR, GAN_INFERENCE_MODEL_DIR, MOBILENET_TRAIN_MODEL_DIR, OBJECT_DETECTION_PCIE_BODY_THRESHOLD, OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES, OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS, OBJECT_DETECTION_PCIE_PART_NUMBER, OBJECT_DETECTION_PCIE_PCIE_THRESHOLD, OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME, OBJECT_DETECTION_PCIE_WAYS, UNDERKILL_RATE, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR, YOLOV5_DIR, OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN, OBJECT_DETECTION_PCIE_CLASSIFICATION_STD
 from data.config import CLASSIFICATION_TRAIN_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR
 
 
@@ -219,39 +219,57 @@ class YOLOInference:
             return True
 
 
-class MobileNetInference:
+class MobileNetGANInference:
     def __init__(self) -> None:
         pass
 
     @classmethod
+    def get_generator_model_path(cls, project):
+        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'generator')
+
+    @classmethod
+    def get_discriminator_model_path(cls, project):
+        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'discriminator')
+    
+    @classmethod
+    def get_encoder_model_path(cls, project):
+        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'encoder')
+    
+    @classmethod
+    def get_generator_model(cls, path, img_size=256, latent_dim=100, channels=3):
+        generator = Generator(img_size, latent_dim, channels)
+        generator.load_state_dict(torch.load(path))
+        generator.to(cls().device()).eval()
+
+        return generator
+
+    @classmethod
+    def get_discriminator_model(cls, path, img_size=256, channels=3):
+        discriminator = Discriminator(img_size, channels)
+        discriminator.load_state_dict(torch.load(path))
+        discriminator.to(cls().device()).eval()
+
+        return discriminator
+    
+    @classmethod
+    def get_encoder_model(cls, path, img_size=256, latent_dim=100, channels=3):
+        encoder = Encoder(img_size, latent_dim, channels)
+        encoder.load_state_dict(torch.load(path))
+        encoder.to(cls().device()).eval()
+
+        return encoder
+
+    @classmethod
     def load_model(cls, model_path):
         return torch.load(model_path, map_location=cls().device)
+    
+    @classmethod
+    def get_criterion(cls):
+        return nn.MSELoss()
 
     @classmethod
     def device(cls):
         return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    @classmethod
-    def predict(cls, image_path, model, class_list, data_transforms):
-        image = Image.open(image_path).convert("RGB")
-        input_tensor = data_transforms(image)
-        input_batch = input_tensor.unsqueeze(0).to(cls().device)
-
-        with torch.no_grad():
-            output = model(input_batch)
-
-        prediction = torch.nn.functional.softmax(output[0], dim=0)
-        predicted_score = prediction.amax().item()
-        predicted_class = prediction.argmax().item()
-
-        if predicted_score > MOBILENETV2_CONFIDENCE:
-            class_name = class_list[predicted_class]
-        elif 'NG' in class_list:
-            class_name = 'NG'
-        else:
-            class_name = 'other'
-
-        return class_name
 
     @classmethod
     def get_train_model_path(cls, project, task_name):
@@ -314,9 +332,63 @@ class MobileNetInference:
             return False
         else:
             return True
+        
+    @classmethod
+    def classification_inference(cls, image_path, model, class_list, data_transforms, confidence):
+        image = Image.open(image_path).convert("RGB")
+        input_tensor = data_transforms(image)
+        input_batch = input_tensor.unsqueeze(0).to(cls().device)
+
+        with torch.no_grad():
+            output = model(input_batch)
+
+        prediction = torch.nn.functional.softmax(output[0], dim=0)
+        predicted_score = prediction.amax().item()
+        predicted_class = prediction.argmax().item()
+
+        if predicted_score > confidence:
+            class_name = class_list[predicted_class]
+        elif 'NG' in class_list:
+            class_name = 'NG'
+        else:
+            class_name = 'other'
+
+        return class_name
+
+    @classmethod
+    def gan_inference(cls, image_path, transform, generator, discriminator, encoder, criterion, kappa, anormaly_threshold):
+        image = cv2.imread(image_path)
+        image = Image.fromarray(image, 'RGB')
+        image_tensor = transform(image)
+        image_tensor = image_tensor.unsqueeze(0)
+        test_dataloader = DataLoader(
+            image_tensor,
+            batch_size=1,
+            shuffle=True
+        )
+
+        for img in test_dataloader:
+            real_img = img.to(cls().device())
+
+            real_z = encoder(real_img)
+            fake_img = generator(real_z)
+
+            real_feature = discriminator.forward_features(real_img)
+            fake_feature = discriminator.forward_features(fake_img)
+
+            # Scores for anomaly detection
+            img_distance = criterion(fake_img, real_img)
+            loss_feature = criterion(fake_feature, real_feature)
+            anomaly_score = img_distance + kappa * loss_feature
+            anomaly_score = float(f'{anomaly_score}')
+                
+            if anomaly_score > anormaly_threshold:
+                return False
+            else:
+                return True
 
 
-class CHIPRCInference(YOLOInference):
+class YOLOFanoGANInference(YOLOInference):
     def __init__(self) -> None:
         super().__init__()
 
@@ -374,31 +446,110 @@ class CHIPRCInference(YOLOInference):
         ])
         return transforms.Compose(pipeline)
     
-    @classmethod
-    def yolo_predict(cls, model, image_path, chiprc_threshold=0.5, target='ChipRC'):
-        result = model(image_path).pandas().xyxy[0]
-        class_names = result['name'].unique()
-        chiprcs = result[result['name'] == target]
-        lcl_chiprc = list(filter(lambda x: x < chiprc_threshold ,list(result[result['name']=='ChipRC']['confidence'])))
+    def nk_chiprc_2_condition(self, target, class_names, result, lcl_chiprc):
         chiprc_count = 0
-
         if target in class_names:
             chiprc_count = result['name'].value_counts()[target]
 
         if target not in class_names or len(class_names) > 1:   
-            return False, chiprcs   
+            return False   
         elif type(chiprc_count) == np.int64 and chiprc_count > 1:
-            return False, chiprcs
+            return False
         elif len(lcl_chiprc) > 0:
-            return False, chiprcs
+            return False
         else:
-            return True, chiprcs
+            return True
+        
+    def hz_chiprc_condition(self, target, class_names, result, lcl_chiprc):
+        chiprc_count = 0
+        if target in class_names:
+            chiprc_count = result['name'].value_counts()[target]
+
+        if target not in class_names or len(class_names) > 1:   
+            return False
+        elif type(chiprc_count) == np.int64 and chiprc_count > 1:
+            return False
+        elif len(lcl_chiprc) > 0:
+            return False
+        else:
+            return True
+        
+    def zj_chiprc_condition(self, class_names):
+        if len(class_names) == 1 and 'Comp' in class_names:
+            return True
+        elif 'Missing' in class_names:
+            return False
+        elif 'PartofComp' in class_names:
+            return False
+        elif 'Particle' in class_names:
+            return False
+        elif 'Shift' in class_names:
+            return False
+        elif 'Billboard' in class_names:
+            return False
+        elif 'Flipover' in class_names:
+            return False
+        else:
+            return False
+        
+    def zj_saw_condition(self, class_names, result):
+        if 'Shift' in class_names:
+            return False
+        elif 'Missing' in class_names:
+            return False
+        else:
+            cnt_saw = result[result['name']=='SAW_t'].shape[0]
+            cnt_3bar_t = result[result['name']=='3bar_t'].shape[0]
+            cnt_5bar_t = result[result['name']=='5bar_t'].shape[0]
+            if (cnt_saw != 1) or (cnt_3bar_t != 1) or (cnt_5bar_t != 1):
+                return False
+        
+        return True
+    
+    def zj_wlcsp567l_condition(self, class_names, target):
+        if target not in class_names:
+            return False
+        return True
+
+    @classmethod
+    def yolo_predict(cls, model, image_path, project, chiprc_threshold=0.5):
+        result = model(image_path).pandas().xyxy[0]
+        class_names = result['name'].unique()
+
+        if project == 'NK_DAOI_CHIPRC_2':
+            target = 'ChipRC'
+            target_df = result[result['name'] == target]
+            lcl_chiprc = list(filter(lambda x: x < chiprc_threshold ,list(result[result['name' ]== target]['confidence'])))
+
+            return cls().nk_chiprc_2_condition(target, class_names, result, lcl_chiprc), target_df
+        
+        elif project == 'HZ_CHIPRC':
+            target = 'ChipRC'
+            lcl_chiprc = list(filter(lambda x: x < chiprc_threshold ,list(result[result['name'] == target]['confidence'])))
+
+            return cls().hz_chiprc_condition(target, class_names, result, lcl_chiprc)
+        
+        elif project == 'ZJ_CHIPRC':
+
+            return cls().zj_chiprc_condition(class_names)
+        
+        elif project == 'ZJ_SAW':
+            target = 'SAW_t'
+            target_df = result[result['name'] == target]
+
+            return cls().zj_saw_condition(class_names, result), target_df
+        
+        elif project == 'ZJ_WLCSP567L':
+            target = 'BGA'
+            target_df = result[result['name'] == target]
+
+            return cls().zj_wlcsp567l_condition(class_names, target), target_df
     
     @classmethod
-    def vae_predict(cls, image_path, chiprcs, transform, generator, discriminator, encoder, criterion, kappa=1.0):
+    def vae_predict(cls, image_path, target_df, transform, generator, discriminator, encoder, criterion, kappa=1.0, anormaly_threshold=0.2):
         image = cv2.imread(image_path)
-        for i in range(chiprcs.shape[0]):
-            chiprc = chiprcs.iloc[i:i+1, :]
+        for i in range(target_df.shape[0]):
+            chiprc = target_df.iloc[i:i+1, :]
             xmin = list(chiprc['xmin'])[0]
             ymin = list(chiprc['ymin'])[0]
             xmax = list(chiprc['xmax'])[0]
@@ -432,13 +583,13 @@ class CHIPRCInference(YOLOInference):
                 anomaly_score = img_distance + kappa * loss_feature
                 anomaly_score = float(anomaly_score)
 
-                if anomaly_score > 0.2:
+                if anomaly_score > anormaly_threshold:
                     return False
                 else:
                     return True
 
 
-class PCIEInference(YOLOInference):
+class MobileNetYOLOIForestInference(YOLOInference):
     def __init__(self) -> None:
         super().__init__()
 

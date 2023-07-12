@@ -52,9 +52,19 @@ TRAINING_STATUS = {
 }
 
 PROJECTS = [
+    # NK Site
     'NK_DAOI_CHIPRC', 
     'NK_DAOI_CHIPRC_2',
-    'NK_PCIE_2'
+    'NK_PCIE_2', 
+    # ZJ Site
+    'ZJ_CHIPRC',
+    'ZJ_IC', 
+    'ZJ_XTAL', 
+    'ZJ_SAW', 
+    'ZJ_WLCSP', 
+    # HZ Site
+    'HZ_CHIPRC', 
+    'HZ_PCIE'
 ]
 
 # Model Folder Path
@@ -114,8 +124,79 @@ YOLOV5_EPOCHS = 300
 # 2. classification
 
 TRAINING_FLOW = {
+    # NK Site
     'NK_DAOI_CHIPRC_2': ['object_detection'],
-    'NK_PCIE_2': ['object_detection']
+    'NK_PCIE_2': ['object_detection'], 
+    # ZJ Site
+    'ZJ_CHIPRC': ['object_detection'],
+    'ZJ_IC': ['classification'], 
+    'ZJ_XTAL': ['classification'], 
+    'ZJ_SAW': ['object_detection'], 
+    'ZJ_WLCSP': ['object_detection'], 
+    # HZ Site
+    'HZ_CHIPRC': ['object_detection'], 
+    'HZ_PCIE': ['object_detection']
+}
+
+# Validation Flow Settings
+
+VALIDATION_FLOW = {
+    'yolo_fanogan': {
+        'NK_DAOI_CHIPRC_2': {
+            'confidence': 0.5, 
+            'gan_settings':{
+                'kappa': 1.0, 
+                'anormaly_threshold': 0.2
+            }
+        }, 
+        'ZJ_SAW': {
+            'confidence': 0.5, 
+            'gan_settings':{
+                'kappa': 1.0, 
+                'anormaly_threshold': 0.1
+            }
+        }, 
+        'ZJ_WLCSP567L': {
+            'confidence': 0, 
+            'gan_settings':{
+                'kappa': 1.0, 
+                'anormaly_threshold': 0.22
+            }
+        }
+    },
+    'yolo': {
+        'HZ_CHIPRC': {
+            'confidence': 0.5
+        },
+        'ZJ_CHIPRC': {},
+    },
+    'mobilenetv2': {
+
+    },
+    'mobilenetv2_fanogan': {
+        'ZJ_IC': {
+            'confidence': 0, 
+            'mean': [0.3248, 0.3176, 0.3038],
+            'std': [0.2565, 0.2558, 0.2521], 
+            'gan_settings':{
+                'kappa': 1.0, 
+                'anormaly_threshold': 0.2334
+            }
+        },
+        'ZJ_XTAL': {
+            'confidence': 0, 
+            'mean': [0.2354, 0.2191, 0.1951],
+            'std': [0.1401, 0.1356, 0.1258],
+            'gan_settings':{
+                'kappa': 1.0, 
+                'anormaly_threshold': 0.1215
+            }
+        }
+    }, 
+    'mobilenetv2_yolo_iforest': {
+        'NK_PCIE_2', 
+        'HZ_PCIE'
+    }
 }
 
 # Object Detection PCIE Settings
@@ -156,5 +237,3 @@ UNDERKILL_RATE = 0.01
 MOBILENETV2_BATCH_SIZE = 64
 
 MOBILENETV2_EPOCHS = 40
-
-MOBILENETV2_CONFIDENCE = 0.9

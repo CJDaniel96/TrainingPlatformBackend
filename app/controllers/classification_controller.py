@@ -1,7 +1,7 @@
-from app.config import MOBILENET_TRAIN_MODEL_DIR, TRAINING_FLOW
+from app.config import MOBILENET_TRAIN_MODEL_DIR, TRAINING_FLOW, VALIDATION_FLOW
 from app.services.database_service import AIModelInformationService, AIModelPerformanceService, CriticalNGService, CropCategorizingRecordService, IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.datasets_service import ClassificationTrainDataProcessing, UnderkillDataProcessing
-from app.services.inference_service import MobileNetInference, YOLOInference
+from app.services.inference_service import MobileNetGANInference, YOLOInference
 from app.services.logging_service import Logger
 from app.services.train_service import MobileNetV2Train
 
@@ -59,26 +59,59 @@ class ClassificationController:
     @classmethod
     def validate(cls, project, task_name):
         Logger.info('MobilNet V2 Validating Start...')
-        model_file = MobileNetInference.get_train_model_path(project, task_name)
-        model = MobileNetInference.load_model(model_file)
-        mean, std = MobileNetInference.get_mean_std(project, task_name)
-        data_transforms = MobileNetInference.get_transform(mean, std)
-        class_list = MobileNetInference.get_classes(project, task_name)
+        if project in VALIDATION_FLOW['mobilenetv2_fanogan']:
+            model_file = MobileNetGANInference.get_train_model_path(project, task_name)
+            model = MobileNetGANInference.load_model(model_file)
+            generator_model_file = MobileNetGANInference.get_generator_model_path(project)
+            discriminator_model_file = MobileNetGANInference.get_discriminator_model_path(project)
+            encoder_model_file = MobileNetGANInference.get_encoder_model_path(project)
+            generator = MobileNetGANInference.get_generator_model(generator_model_file)
+            discriminator = MobileNetGANInference.get_discriminator_model(discriminator_model_file)
+            encoder = MobileNetGANInference.get_encoder_model(encoder_model_file)
+            criterion = MobileNetGANInference.get_criterion()
+            mean, std = MobileNetGANInference.get_mean_std(project, task_name)
+            data_transforms = MobileNetGANInference.get_transform(mean, std)
+            class_list = MobileNetGANInference.get_classes(project, task_name)
 
-        validation_images = MobileNetInference.get_validation_images(project)
-        validation_count = MobileNetInference.check_validation_count(validation_images)
-        underkill_folder = MobileNetInference.get_underkill_folder(project, task_name)
+            validation_images = MobileNetGANInference.get_validation_images(project)
+            validation_count = MobileNetGANInference.check_validation_count(validation_images)
+            underkill_folder = MobileNetGANInference.get_underkill_folder(project, task_name)
 
-        underkill_count = 0
-        for validation_image in validation_images:
-            answer = MobileNetInference.predict(validation_image, model, class_list, data_transforms)
-            if answer:
-                underkill_count += 1
-                MobileNetInference.output_underkill_image(validation_image, underkill_folder)
-        
-        final_answer = MobileNetInference.check_validation_result(underkill_count, validation_count)
+            kappa = VALIDATION_FLOW['mobilenetv2_fanogan'][project]['gan_settings']['kappa']
+            anormaly_threshold = VALIDATION_FLOW['mobilenetv2_fanogan'][project]['gan_settings']['anormaly_threshold']
+            confidence = VALIDATION_FLOW['mobilenetv2_fanogan'][project]['confidence']
 
-        return final_answer
+            underkill_count = 0
+            for validation_image in validation_images:
+                answer = MobileNetGANInference.classification_inference(validation_image, model, class_list, data_transforms, confidence)
+                if answer and MobileNetGANInference.gan_inference(
+                    validation_image, data_transforms, generator, discriminator, encoder, criterion, kappa, anormaly_threshold
+                ):
+                    underkill_count += 1
+                    MobileNetGANInference.output_underkill_image(validation_image, underkill_folder)
+            
+            final_answer = MobileNetGANInference.check_validation_result(underkill_count, validation_count)
+
+            return final_answer
+        elif project in VALIDATION_FLOW['mobilenetv2']:
+            model_file = MobileNetGANInference.get_train_model_path(project, task_name)
+            model = MobileNetGANInference.load_model(model_file)
+            mean, std = MobileNetGANInference.get_mean_std(project, task_name)
+            data_transforms = MobileNetGANInference.get_transform(mean, std)
+            class_list = MobileNetGANInference.get_classes(project, task_name)
+
+            validation_images = MobileNetGANInference.get_validation_images(project)
+            validation_count = MobileNetGANInference.check_validation_count(validation_images)
+            underkill_folder = MobileNetGANInference.get_underkill_folder(project, task_name)
+
+            underkill_count = 0
+            for validation_image in validation_images:
+                answer = MobileNetGANInference.classification_inference(validation_image, model, class_list, data_transforms)
+                if answer:
+                    underkill_count += 1
+                    MobileNetGANInference.output_underkill_image(validation_image, underkill_folder)
+            
+            final_answer = MobileNetGANInference.check_validation_result(underkill_count, validation_count)
 
     @classmethod
     def get_finetune_type(cls, tablename):
@@ -100,7 +133,11 @@ class ClassificationController:
             else:
                 return object_detection_underkills, result
         elif classification_validations:
-            ...
+            result = UnderkillDataProcessing.check_model_pass_or_fail(classification_underkills, classification_validations)
+            if result:
+                return [], result
+            else:
+                return classification_underkills, result
         else:
             return [], True
         
