@@ -1,6 +1,6 @@
 # coding: utf-8
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Table, Text, create_engine, text, func
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text, text, func
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 

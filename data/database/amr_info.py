@@ -1,7 +1,6 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Column, DateTime, Float, Integer, Text, create_engine
+from sqlalchemy import Boolean, Column, DateTime, Float, Integer, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 metadata = Base.metadata
