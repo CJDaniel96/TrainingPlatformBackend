@@ -9,7 +9,7 @@ DATABASES = {
         'HOST': '10.0.4.188',
         'PORT': '5432',
     }, 
-    'amr_nifi_test': {
+    'amr_info': {
         'ENGINE': 'postgresql',
         'NAME': 'amr_nifi_test',
         'USER': 'postgres',

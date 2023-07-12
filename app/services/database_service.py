@@ -7,12 +7,12 @@ from app.config import IRI_RECORD_STATUS, SITE, SMART_FILTER_NUMBER, URD_RECORD_
 from app.services.logging_service import Logger
 from data.config import DATABASES
 from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CategoryMapping, CriticalNg, CropCategorizingRecord, ImagePool, IriRecord, ODTrainingInfo, UploadData, UrdRecord
-from data.database.amr_nifi_test import AmrRawData
+from data.database.amr_info import AmrRawData
 from data.database.sessions import create_session
 
 
 AI = DATABASES['ai']['NAME']
-AMR_NIFI_TEST = DATABASES['amr_nifi_test']['NAME']
+AMR_INFO = DATABASES['amr_info']['NAME']
 CVAT = DATABASES['cvat']['NAME']
 
 
@@ -207,7 +207,7 @@ class ImageDataService(ImagePoolService):
     def get_images(cls, site, line, group_type, start_date, end_date, smart_filter=False, is_covered=True, ai_result='0'):
         Logger.info('Get Images UUID from query data')
         images = {}
-        with create_session(AMR_NIFI_TEST) as session:
+        with create_session(AMR_INFO) as session:
             end_date += timedelta(days=1)
             for each_line in eval(line):
                 data = session.query(AmrRawData.image_path).filter(
@@ -233,7 +233,7 @@ class ImageDataService(ImagePoolService):
         date = date_time[:4] + '-' + date_time[4:6] + '-' + date_time[6:8]
         image_path = f'{date}/{date_time}/{image_name}'
 
-        with create_session(AMR_NIFI_TEST) as session:
+        with create_session(AMR_INFO) as session:
             data = session.query(AmrRawData.uuid).filter(AmrRawData.image_path == image_path).first()
 
         return data.uuid
@@ -247,7 +247,7 @@ class UploadDataService(ImagePoolService):
     def get_images(self, uuids):
         Logger.info('Get Images UUID from upload data')
         images = {}
-        with create_session(AMR_NIFI_TEST) as session:
+        with create_session(AMR_INFO) as session:
             data = session.query(AmrRawData).filter(AmrRawData.uuid.in_(eval(uuids))).all()
             for obj in data:
                 if obj.line_id not in images:
