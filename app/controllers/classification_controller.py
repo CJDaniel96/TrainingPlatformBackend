@@ -121,8 +121,8 @@ class ClassificationController:
     def check_underkills(cls, project, task_name):
         object_detection_underkills = UnderkillDataProcessing.get_object_detection_underkill_path(project, task_name)
         classification_underkills = UnderkillDataProcessing.get_classification_underkill_path(project, task_name)
-        object_detection_validations = UnderkillDataProcessing.get_object_detection_validations(project, task_name)
-        classification_validations = UnderkillDataProcessing.get_classification_validations(project, task_name)
+        object_detection_validations = UnderkillDataProcessing.get_object_detection_validations(project)
+        classification_validations = UnderkillDataProcessing.get_classification_validations(project)
 
         if object_detection_underkills and classification_underkills:
             ...
