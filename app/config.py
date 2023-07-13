@@ -61,7 +61,7 @@ PROJECTS = [
     'ZJ_IC', 
     'ZJ_XTAL', 
     'ZJ_SAW', 
-    'ZJ_WLCSP', 
+    'ZJ_WLCSP567L', 
     # HZ Site
     'HZ_CHIPRC', 
     'HZ_PCIE'
