@@ -2,6 +2,7 @@
 
 DATABASES = {
     'ai': {
+        'DATABASE': 'ai', 
         'ENGINE': 'postgresql',
         'NAME': 'ai',
         'USER': 'postgres',
@@ -10,6 +11,7 @@ DATABASES = {
         'PORT': '5432',
     }, 
     'amr_info': {
+        'DATABASE': 'amr_info', 
         'ENGINE': 'postgresql',
         'NAME': 'amr_nifi_test',
         'USER': 'postgres',
@@ -18,6 +20,7 @@ DATABASES = {
         'PORT': '5432',
     }, 
     'cvat': {
+        'DATABASE': 'cvat', 
         'ENGINE': 'postgresql',
         'NAME': 'cvat',
         'USER': 'root',
