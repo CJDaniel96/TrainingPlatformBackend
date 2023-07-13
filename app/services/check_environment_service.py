@@ -160,7 +160,7 @@ class CheckModelEnvironment:
     def check_yolo_train_models_dir(cls):
         Logger.info('Check YOLO Train Models Dir')
         for project in PROJECTS:
-            folder = os.path.join(CLASSIFICATION_INFERNCE_MODEL_DIR, project)
+            folder = os.path.join(YOLO_TRAIN_MODEL_DIR, project)
             if not os.path.exists(folder):
                 Logger.info(f'Create {project} YOLO Train Models Dir')
                 os.makedirs(folder)
