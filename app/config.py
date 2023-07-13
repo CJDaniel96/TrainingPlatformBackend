@@ -132,7 +132,7 @@ TRAINING_FLOW = {
     'ZJ_IC': ['classification'], 
     'ZJ_XTAL': ['classification'], 
     'ZJ_SAW': ['object_detection'], 
-    'ZJ_WLCSP': ['object_detection'], 
+    'ZJ_WLCSP567L': ['object_detection'], 
     # HZ Site
     'HZ_CHIPRC': ['object_detection'], 
     'HZ_PCIE': ['object_detection']
