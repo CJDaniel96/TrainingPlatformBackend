@@ -11,9 +11,9 @@ from data.database.amr_info import AmrRawData
 from data.database.sessions import create_session
 
 
-AI = DATABASES['ai']['NAME']
-AMR_INFO = DATABASES['amr_info']['NAME']
-CVAT = DATABASES['cvat']['NAME']
+AI = DATABASES['ai']['DATABASE']
+AMR_INFO = DATABASES['amr_info']['DATABASE']
+CVAT = DATABASES['cvat']['DATABASE']
 
 
 class IRIRecordService:
