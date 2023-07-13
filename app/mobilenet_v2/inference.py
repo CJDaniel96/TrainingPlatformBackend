@@ -90,15 +90,14 @@ def run(data, weights, confidence, classes_file, classes, mean_std_file, save_im
         mean, std = get_mean_std(mean_std_file)
     
     if os.path.isdir(data):
-        images = os.path.join(data, '**', '*.jpg')
+        data_list = glob(os.path.join(data, '**', '*.jpg'), recursive=True) + glob(os.path.join(data, '**', '*.jpeg'), recursive=True)
     elif os.path.isfile(data):
-        images = data
+        data_list = [data]
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = torch.load(weights, map_location=device)
 
     total_since = time.time()
-    data_list = glob(images, recursive=True)
     data_amount = len(data_list)
 
     for image_path in data_list:

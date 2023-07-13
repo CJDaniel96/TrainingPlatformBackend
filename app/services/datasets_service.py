@@ -17,28 +17,28 @@ class UnderkillDataProcessing:
     @classmethod
     def get_object_detection_underkill_path(cls, project, task_name):
         underkill_folder = os.path.join(OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, project, task_name)
-        underkills = glob(os.path.join(underkill_folder, '*.jpg'))
+        underkills = glob(os.path.join(underkill_folder, '*.jpg')) + glob(os.path.join(underkill_folder, '*.jpeg'))
 
         return underkills
 
     @classmethod
     def get_classification_underkill_path(cls, project, task_name):
         underkill_folder = os.path.join(CLASSIFICATION_UNDERKILL_DATASETS_DIR, project, task_name)
-        underkills = glob(os.path.join(underkill_folder, '*.jpg'))
+        underkills = glob(os.path.join(underkill_folder, '*.jpg')) + glob(os.path.join(underkill_folder, '*.jpeg'))
 
         return underkills
     
     @classmethod
-    def get_object_detection_validations(cls, project, task_name):
+    def get_object_detection_validations(cls, project):
         validation_folder = os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project, 'images')
-        validations = glob(os.path.join(validation_folder, '*.jpg'))
+        validations = glob(os.path.join(validation_folder, '*.jpg')) + glob(os.path.join(validation_folder, '*.jpeg'))
 
         return validations
 
     @classmethod
-    def get_classification_validations(cls, project, task_name):
+    def get_classification_validations(cls, project):
         validation_folder = os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, 'images')
-        validations = glob(os.path.join(validation_folder, '*.jpg'))
+        validations = glob(os.path.join(validation_folder, '*.jpg')) + glob(os.path.join(validation_folder, '*.jpeg'))
 
         return validations
     
@@ -165,7 +165,7 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
         cls().makedirs(train_images_folder)
         cls().makedirs(train_labels_folder)
 
-        for image in glob(os.path.join(train_data_dir, '*.jpg')):
+        for image in glob(os.path.join(train_data_dir, '*.jpg')) + glob(os.path.join(train_data_dir, '*.jpeg')):
             shutil.copyfile(image, os.path.abspath(os.path.join(train_images_folder, os.path.basename(image))))
         for label in glob(os.path.join(train_data_dir, '*.txt')):
             shutil.copyfile(label, os.path.abspath(os.path.join(train_labels_folder, os.path.basename(label))))
@@ -187,7 +187,7 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
         train_images_folder = os.path.join(train_data_folder, 'images', 'train')
         train_labels_folder = os.path.join(train_data_folder, 'labels', 'train')
 
-        train_images_basicline_dataset = glob(os.path.join(basicline_dataset, 'images', 'train', '*.jpg'))
+        train_images_basicline_dataset = glob(os.path.join(basicline_dataset, 'images', 'train', '*.jpg')) + glob(os.path.join(basicline_dataset, 'images', 'train', '*.jpeg'))
         train_labels_basicline_dataset = glob(os.path.join(basicline_dataset, 'labels', 'train', '*.txt'))
 
         if train_images_basicline_dataset and train_labels_basicline_dataset:
@@ -286,8 +286,8 @@ class ClassificationTrainDataProcessing(TrainDataProcessing):
 
 class CategorizeDataProcessing:
     @classmethod
-    def get_images(cls, train_data_folder, image_type='*.jpg'):
-        return glob(os.path.join(train_data_folder, 'images', 'train', image_type))
+    def get_images(cls, train_data_folder):
+        return glob(os.path.join(train_data_folder, 'images', 'train', '*.jpg')) + glob(os.path.join(train_data_folder, 'images', 'train', '*.jpeg'))
     
     @classmethod
     def get_object_detection_basicline_image_names(cls, project):

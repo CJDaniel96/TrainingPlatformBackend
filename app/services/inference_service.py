@@ -141,11 +141,11 @@ class YOLOInference:
     
     @classmethod
     def get_validation_images(cls, project):
-        return glob(os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project, '**', '*.jpg'), recursive=True)
+        return glob(os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project, '**', '*.jpg'), recursive=True) + glob(os.path.join(OBJECT_DETECTION_VALIDATION_DATASETS_DIR, project, '**', '*.jpeg'), recursive=True)
     
     @classmethod
     def get_train_images(cls, train_data_folder):
-        return glob(os.path.join(train_data_folder, '**', '*.jpg'), recursive=True)
+        return glob(os.path.join(train_data_folder, '**', '*.jpg'), recursive=True) + glob(os.path.join(train_data_folder, '**', '*.jpeg'), recursive=True)
 
     @classmethod
     def predict(cls, model, image_path):
@@ -307,7 +307,7 @@ class MobileNetGANInference:
 
     @classmethod
     def get_validation_images(cls, project):
-        return glob(os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, '**', '*.jpg'), recursive=True)
+        return glob(os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, '**', '*.jpg'), recursive=True) + glob(os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, '**', '*.jpeg'), recursive=True)
     
     @classmethod
     def check_validation_count(cls, images):
