@@ -261,7 +261,7 @@ class MobileNetGANInference:
 
     @classmethod
     def load_model(cls, model_path):
-        return torch.load(model_path, map_location=cls().device)
+        return torch.load(model_path, map_location=cls().device())
     
     @classmethod
     def get_criterion(cls):
@@ -337,7 +337,7 @@ class MobileNetGANInference:
     def classification_inference(cls, image_path, model, class_list, data_transforms, confidence):
         image = Image.open(image_path).convert("RGB")
         input_tensor = data_transforms(image)
-        input_batch = input_tensor.unsqueeze(0).to(cls().device)
+        input_batch = input_tensor.unsqueeze(0).to(cls().device())
 
         with torch.no_grad():
             output = model(input_batch)
