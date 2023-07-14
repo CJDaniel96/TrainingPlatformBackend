@@ -47,4 +47,4 @@ class MobileNetV2Train:
     @classmethod
     def train_model(cls, project, task_name, data):
         save_result_dir = os.path.join(MOBILENET_TRAIN_MODEL_DIR, project, task_name)
-        mobilenet_run(data=data, batch_size=MOBILENETV2_BATCH_SIZE, num_epochs=MOBILENETV2_EPOCHS, save_dir=save_result_dir)
+        mobilenet_run(data_dir=data, batch_size=MOBILENETV2_BATCH_SIZE, num_epochs=MOBILENETV2_EPOCHS, save_dir=save_result_dir)
