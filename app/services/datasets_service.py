@@ -267,7 +267,7 @@ class ClassificationTrainDataProcessing(TrainDataProcessing):
     @classmethod
     def merge_classification_basicline_data(cls, train_data_folder, project):
         basicline_dataset = os.path.abspath(os.path.join(CLASSIFICATION_BASICLINE_DATASETS_DIR, project))
-        images_basicline_folder = os.listdir(basicline_dataset, 'images')
+        images_basicline_folder = os.listdir(os.path.join(basicline_dataset, 'images'))
 
         if images_basicline_folder:
             for dataset in os.listdir(images_basicline_folder):
