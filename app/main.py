@@ -162,7 +162,7 @@ def app_run():
         underkills, result = ClassificationController.check_underkills(project, task_name)
         crop_image_ids = ClassificationController.upload_crop_categorizing(underkills, group_type, id, finetune_type)
         model_id = ClassificationController.upload_ai_model_information(train_model_path, id, finetune_type, group_type, result)
-        ClassificationController.upload_ai_model_performance(project, task_name, model_id, underkills, train_model_path, crop_image_ids, train_dataset_inference_task_id)
+        ClassificationController.upload_ai_model_performance(project, task_name, model_id, underkills, crop_image_ids, train_dataset_inference_task_id)
             
         Listener.update_record_status(tablename, id, TRAINING_PLATFORM_RECORD_STATUS['FINISHED'])
         CVATController.logout()
