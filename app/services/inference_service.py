@@ -224,6 +224,13 @@ class MobileNetGANInference:
         pass
 
     @classmethod
+    def check_folder(cls, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        return path
+
+    @classmethod
     def get_generator_model_path(cls, project):
         return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'generator')
 
