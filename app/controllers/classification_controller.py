@@ -27,7 +27,7 @@ class ClassificationController:
             return False
         
     @classmethod
-    def get_train_model_path(project, task_name):
+    def get_train_model_path(cls, project, task_name):
         return MobileNetGANInference.get_train_model_path(project, task_name)
         
     @classmethod
