@@ -307,8 +307,8 @@ class MobileNetGANInference:
     def get_mean_std(cls, project, task_name):
         mean_std_file = os.path.join(CLASSIFICATION_TRAIN_DATASETS_DIR, project, task_name, 'mean_std.txt')
         with open(mean_std_file, 'r') as f:
-            mean = eval(re.search('[[].*[]]', f.readline())[0])
-            std = eval(re.search('[[].*[]]', f.readline())[0])
+            mean = eval(re.search('[\[].*[\]]', f.readline())[0])
+            std = eval(re.search('[\[].*[\]]', f.readline())[0])
 
         return mean, std
 
