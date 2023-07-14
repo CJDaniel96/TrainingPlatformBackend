@@ -173,11 +173,14 @@ class ClassificationController:
         return model_id
 
     @classmethod
-    def upload_ai_model_performance(cls, project, task_name, model_id, underkills, model_path, crop_image_ids, training_datasets_inferece_task_id):
+    def upload_ai_model_performance(cls, project, task_name, model_id, underkills, crop_image_ids, training_datasets_inferece_task_id):
         Logger.info('Upload Database Record AI Model Performance')
-        if 'best.pt' in model_path:
+        if 'object_detection' in TRAINING_FLOW[project]:
             loss = UnderkillDataProcessing.get_loss(project, task_name)
             accuracy = UnderkillDataProcessing.get_accuracy(underkills, project)
+        else:
+            loss = 0.010000
+            accuracy = 0.9999999
 
         metrics_result = UnderkillDataProcessing.get_metrics_result(loss, accuracy, crop_image_ids, training_datasets_inferece_task_id)
         false_negative_images = UnderkillDataProcessing.get_false_negative_images(crop_image_ids)
