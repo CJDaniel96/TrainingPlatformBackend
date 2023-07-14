@@ -285,13 +285,22 @@ class MobileNetGANInference:
     @classmethod
     def get_transform(cls, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
         return transforms.Compose([
-        transforms.Resize((224, 224)), 
-        transforms.ToTensor(), 
-        transforms.Normalize(
-            mean=mean,
-            std=std
-        )
-    ])
+            transforms.Resize((224, 224)), 
+            transforms.ToTensor(), 
+            transforms.Normalize(
+                mean=mean,
+                std=std
+            )
+        ])
+    
+    @classmethod
+    def get_gan_transform(cls, img_size, channels): 
+        return transforms.Compose([
+            transforms.Resize(img_size * 2), 
+            transforms.RandomHorizontalFlip(), 
+            transforms.ToTensor(), 
+            transforms.Normalize(0.5 * channels, 0.5 * channels)
+        ])
 
     @classmethod
     def get_classes(cls, project, task_name):
@@ -363,9 +372,10 @@ class MobileNetGANInference:
         return class_name
 
     @classmethod
-    def gan_inference(cls, image_path, transform, generator, discriminator, encoder, criterion, kappa, anormaly_threshold):
+    def gan_inference(cls, image_path, generator, discriminator, encoder, criterion, kappa, anormaly_threshold, img_size=256, channels=3):
         image = cv2.imread(image_path)
         image = Image.fromarray(image, 'RGB')
+        transform = cls().get_gan_transform(img_size, channels)
         image_tensor = transform(image)
         image_tensor = image_tensor.unsqueeze(0)
         test_dataloader = DataLoader(
