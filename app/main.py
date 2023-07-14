@@ -147,6 +147,7 @@ def app_run():
             Listener.update_record_classification_training_status(tablename, id, TRAINING_STATUS['DONE'])
 
             train_model_path = ClassificationController.get_train_model_path(project, task_name)
+            train_dataset_inference_task_id = None
         else:
             train_dataset_inference_task_name = CVATController.custom_task_name(task_name, 'inference')
             task_zip_file = CVATController.download(task_id, train_dataset_inference_task_name, cvat_cookie)
