@@ -89,7 +89,7 @@ class Listener:
 
     @classmethod
     def update_record_classification_training_info(cls, result, task_id, comp_type):
-        Logger.info('Update Database Record Object Detection Training Information')
+        Logger.info('Update Database Record Classification Training Information')
         if result:
             val_status = 'APPROVE'
             model_version = TrainingInfoService.get_classification_model_version(comp_type, val_status)
