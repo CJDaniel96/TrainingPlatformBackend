@@ -89,7 +89,7 @@ class ClassificationController:
             for validation_image in validation_images:
                 answer = MobileNetGANInference.classification_inference(validation_image, model, class_list, data_transforms, confidence)
                 if answer and MobileNetGANInference.gan_inference(
-                    validation_image, data_transforms, generator, discriminator, encoder, criterion, kappa, anormaly_threshold
+                    validation_image, generator, discriminator, encoder, criterion, kappa, anormaly_threshold
                 ):
                     underkill_count += 1
                     MobileNetGANInference.output_underkill_image(validation_image, underkill_folder)
