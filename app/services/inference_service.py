@@ -295,12 +295,17 @@ class MobileNetGANInference:
     
     @classmethod
     def get_gan_transform(cls, img_size, channels): 
-        return transforms.Compose([
-            transforms.Resize(img_size * 2), 
-            transforms.RandomHorizontalFlip(), 
-            transforms.ToTensor(), 
-            transforms.Normalize(0.5 * channels, 0.5 * channels)
+        pipeline = [
+            transforms.Resize([img_size]*2),
+            transforms.RandomHorizontalFlip()
+        ]
+        if channels == 1:
+            pipeline.append(transforms.Grayscale())
+        pipeline.extend([
+            transforms.ToTensor(),
+            transforms.Normalize([0.5]*channels, [0.5]*channels)
         ])
+        return transforms.Compose(pipeline)
 
     @classmethod
     def get_classes(cls, project, task_name):
