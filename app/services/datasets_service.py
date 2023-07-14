@@ -271,7 +271,7 @@ class ClassificationTrainDataProcessing(TrainDataProcessing):
 
         if images_basicline_folder:
             for dataset in os.listdir(images_basicline_folder):
-                for folder in os.listdir(images_basicline_folder, dataset):
+                for folder in os.listdir(os.path.join(images_basicline_folder, dataset)):
                     try:
                         shutil.copytree(
                             os.path.join(images_basicline_folder, dataset, folder), 
