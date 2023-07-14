@@ -40,8 +40,9 @@ class CVATController:
         task_id = CVATService.create_task(auth_header, task_create_information)
         task_data = CVATService.get_task_data_json(images_folder)
         CVATService.upload_task_data(task_id, auth_header, task_data)
-        task_annotation = OriginDataProcessing.zip_xml_data(xml_folder)
-        CVATService.upload_task_annotation(task_id, auth_header, task_annotation)
+        if xml_folder:
+            task_annotation = OriginDataProcessing.zip_xml_data(xml_folder)
+            CVATService.upload_task_annotation(task_id, auth_header, task_annotation)
 
         return task_id
 

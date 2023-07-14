@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from app.config import TRAINING_FLOW
 from app.services.logging_service import Logger
 from app.services.inference_service import YOLOInference, MobileNetGANInference
 from glob import glob
@@ -20,33 +21,36 @@ class YOLOInferenceController(InferenceController):
     @classmethod
     def inference(cls, data, project):
         Logger.info('YOLO Inference')
-        org_data_folder = os.path.dirname(data)
-        model_file = YOLOInference.get_inference_model_path(project)
-        model = YOLOInference.load_model(model_file)
-        xml_folder = YOLOInference.check_folder(os.path.join(org_data_folder, 'xml'))
+        if 'object_detection' in TRAINING_FLOW[project]: 
+            org_data_folder = os.path.dirname(data)
+            model_file = YOLOInference.get_inference_model_path(project)
+            model = YOLOInference.load_model(model_file)
+            xml_folder = YOLOInference.check_folder(os.path.join(org_data_folder, 'xml'))
 
-        if os.path.isfile(data):
-            images = glob(data)
-        elif os.path.isdir(data):
-            if glob(os.path.join(data, '*.jpg')):
-                images = glob(os.path.join(data, '*.jpg'))
-            elif glob(os.path.join(data, '*.jpeg')):
-                images = glob(os.path.join(data, '*.jpeg'))
+            if os.path.isfile(data):
+                images = glob(data)
+            elif os.path.isdir(data):
+                if glob(os.path.join(data, '*.jpg')):
+                    images = glob(os.path.join(data, '*.jpg'))
+                elif glob(os.path.join(data, '*.jpeg')):
+                    images = glob(os.path.join(data, '*.jpeg'))
 
-        for image_path in images:
-            result = YOLOInference.predict(model, image_path)
-            image = YOLOInference.read_image(image_path)
-            image_size = image.shape
-            image_name = os.path.basename(image_path)
-            YOLOInference.output_xml(
-                image_size, 
-                image_name, 
-                list(result['name'].values), 
-                list(result[['xmin', 'ymin', 'xmax', 'ymax']].values), 
-                xml_folder
-            )
+            for image_path in images:
+                result = YOLOInference.predict(model, image_path)
+                image = YOLOInference.read_image(image_path)
+                image_size = image.shape
+                image_name = os.path.basename(image_path)
+                YOLOInference.output_xml(
+                    image_size, 
+                    image_name, 
+                    list(result['name'].values), 
+                    list(result[['xmin', 'ymin', 'xmax', 'ymax']].values), 
+                    xml_folder
+                )
 
-        return xml_folder
+            return xml_folder
+        else:
+            return 
     
     @classmethod
     def get_train_model_path(cls, project, task_name):
