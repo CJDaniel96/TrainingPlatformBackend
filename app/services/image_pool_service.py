@@ -11,7 +11,6 @@ class ImagePool:
     @classmethod
     def download(cls, image_pool, image_list):
         resp = requests.post(IMAGE_POOL_DOWNLOAD_URL, proxies=IMAGE_POOL_DOWNLOAD_PROXIES, json={
-            "prefix": image_pool.prefix,
             "paths": image_list
         })
         if resp.status_code == 200:

@@ -219,7 +219,7 @@ class ImageDataService(ImagePoolService):
                     AmrRawData.ai_result == ai_result
                 ).all()
 
-                images[each_line] = [obj.image_path for obj in data]
+                images[each_line] = [each_line + '/' + obj.image_path for obj in data]
 
             if smart_filter:
                 images = cls().smart_filter_images(images)
@@ -251,9 +251,9 @@ class UploadDataService(ImagePoolService):
             data = session.query(AmrRawData).filter(AmrRawData.uuid.in_(eval(uuids))).all()
             for obj in data:
                 if obj.line_id not in images:
-                    images[obj.line_id] = [obj.image_path]
+                    images[obj.line_id] = [obj.line_id + '/' + obj.image_path]
                 else:
-                    images[obj.line_id].append(obj.image_path)
+                    images[obj.line_id].append(obj.line_id + '/' + obj.image_path)
 
             return images
 
@@ -263,16 +263,17 @@ class UploadImageDataService(ImagePoolService):
         super().__init__()
 
     @classmethod
-    def get_images(self, uuids):
+    def get_images(self, uuids, line='upload_image'):
         Logger.info('Get Images UUID from upload images data')
         images = {}
         with create_session(AI) as session:
             data = session.query(UploadData).filter(UploadData.uuid.in_(eval(uuids))).all()
+            image_pool = session.query(ImagePool.prefix).filter(ImagePool.line == line).first()
             for obj in data:
                 if obj.line_id not in images:
-                    images[obj.line_id] = [obj.image_path]
+                    images[obj.line_id] = [image_pool.prefix + '/' + obj.image_path]
                 else:
-                    images[obj.line_id].append(obj.image_path)
+                    images[obj.line_id].append(image_pool.prefix + '/' + obj.image_path)
 
             return images
         
