@@ -367,14 +367,10 @@ class MobileNetGANInference:
         predicted_score = prediction.amax().item()
         predicted_class = prediction.argmax().item()
 
-        if predicted_score > confidence:
-            class_name = class_list[predicted_class]
-        elif 'NG' in class_list:
-            class_name = 'NG'
+        if class_list[predicted_class] == 'OK' and predicted_score > confidence:
+            return True
         else:
-            class_name = 'other'
-
-        return class_name
+            return False
 
     @classmethod
     def gan_inference(cls, image_path, generator, discriminator, encoder, criterion, kappa, anormaly_threshold, img_size=256, channels=3):
