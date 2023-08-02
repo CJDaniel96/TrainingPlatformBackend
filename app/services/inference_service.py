@@ -528,6 +528,22 @@ class YOLOFanoGANInference(YOLOInference):
         if target not in class_names:
             return False
         return True
+    
+    def zj_xtal_condition(self, class_names, target):
+        if 'MISSINGSOLDER' in class_names:
+            return False
+        elif 'EMPTY' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'TOUCH' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        elif len(class_names) == 3 and target in class_names:
+            return True
+        else:
+            return False
 
     @classmethod
     def yolo_predict(cls, model, image_path, project, chiprc_threshold=0.5):
@@ -562,6 +578,12 @@ class YOLOFanoGANInference(YOLOInference):
             target_df = result[result['name'] == target]
 
             return cls().zj_wlcsp567l_condition(class_names, target), target_df
+        
+        elif project == 'ZJ_XTAL':
+            target = 'BODY'
+            target_df = result[result['name'] == target]
+
+            return cls().zj_xtal_condition(class_names, target), target_df
     
     @classmethod
     def vae_predict(cls, image_path, target_df, transform, generator, discriminator, encoder, criterion, kappa=1.0, anormaly_threshold=0.2):

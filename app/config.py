@@ -130,7 +130,7 @@ TRAINING_FLOW = {
     # ZJ Site
     'ZJ_CHIPRC': ['object_detection'],
     'ZJ_IC': ['classification'], 
-    'ZJ_XTAL': ['classification'], 
+    'ZJ_XTAL': ['object_detection'], 
     'ZJ_SAW': ['object_detection'], 
     'ZJ_WLCSP567L': ['object_detection'], 
     # HZ Site
@@ -169,6 +169,7 @@ VALIDATION_FLOW = {
             'confidence': 0.5
         },
         'ZJ_CHIPRC': {},
+        'ZJ_XTAL': {}
     },
     'mobilenetv2': {
 
@@ -181,15 +182,6 @@ VALIDATION_FLOW = {
             'gan_settings':{
                 'kappa': 1.0, 
                 'anormaly_threshold': 0.2334
-            }
-        },
-        'ZJ_XTAL': {
-            'confidence': 0, 
-            'mean': [0.2354, 0.2191, 0.1951],
-            'std': [0.1401, 0.1356, 0.1258],
-            'gan_settings':{
-                'kappa': 1.0, 
-                'anormaly_threshold': 0.1215
             }
         }
     }, 
