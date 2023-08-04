@@ -1,5 +1,5 @@
 from app.config import TRAINING_PLATFORM_RECORD_STATUS, TRAINING_STATUS
-from app.controllers.Initial_controller import InitialController
+from app.controllers.initial_controller import InitialController
 from app.controllers.categorize_controller import CategorizeController
 from app.controllers.check_environment_controller import CheckEnvironmentController
 from app.controllers.classification_controller import ClassificationController
