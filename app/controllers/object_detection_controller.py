@@ -108,7 +108,7 @@ class ObjectDetectionController:
 
             underkill_count = 0
             for validation_image in validation_images:
-                answer, _ = YOLOFanoGANInference.yolo_predict(model, validation_image, project)
+                answer = YOLOFanoGANInference.yolo_predict(model, validation_image, project)
                 if answer:
                     underkill_count += 1
                     YOLOFanoGANInference.output_underkill_image(validation_image, underkill_folder)

@@ -583,7 +583,7 @@ class YOLOFanoGANInference(YOLOInference):
             target = 'BODY'
             target_df = result[result['name'] == target]
 
-            return cls().zj_xtal_condition(class_names, target), target_df
+            return cls().zj_xtal_condition(class_names, target)
     
     @classmethod
     def vae_predict(cls, image_path, target_df, transform, generator, discriminator, encoder, criterion, kappa=1.0, anormaly_threshold=0.2):
