@@ -71,9 +71,23 @@ class ObjectDetectionController:
             generator_model_file = YOLOFanoGANInference.get_generator_model_path(project)
             discriminator_model_file = YOLOFanoGANInference.get_discriminator_model_path(project)
             encoder_model_file = YOLOFanoGANInference.get_encoder_model_path(project)
-            generator = YOLOFanoGANInference.get_generator_model(generator_model_file)
-            discriminator = YOLOFanoGANInference.get_discriminator_model(discriminator_model_file)
-            encoder = YOLOFanoGANInference.get_encoder_model(encoder_model_file)
+            generator = YOLOFanoGANInference.get_generator_model(
+                generator_model_file, 
+                VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['img_size'],
+                VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['latent_dim'], 
+                VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['channels']
+            )
+            discriminator = YOLOFanoGANInference.get_discriminator_model(
+                discriminator_model_file, 
+                VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['img_size'],  
+                VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['channels']
+            )
+            encoder = YOLOFanoGANInference.get_encoder_model(
+                encoder_model_file, 
+                VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['img_size'],
+                VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['latent_dim'], 
+                VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['channels']
+            )
             transform = YOLOFanoGANInference.get_transform()
             criterion = YOLOFanoGANInference.get_criterion()
 
@@ -83,7 +97,7 @@ class ObjectDetectionController:
 
             kappa = VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['kappa']
             anormaly_threshold = VALIDATION_FLOW['yolo_fanogan'][project]['gan_settings']['anormaly_threshold']
-            confidence = VALIDATION_FLOW['mobilenetv2_fanogan'][project]['confidence']
+            confidence = VALIDATION_FLOW['yolo_fanogan'][project]['confidence']
             
             underkill_count = 0
             for validation_image in validation_images:

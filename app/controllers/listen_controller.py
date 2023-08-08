@@ -1,6 +1,5 @@
 import time
-
-import psycopg2
+from sqlalchemy.exc import OperationalError
 from app.config import LISTEN_DATABASE_TIME_SLEEP
 from app.services.database_service import IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.logging_service import Logger
@@ -14,7 +13,7 @@ class Listener:
             try:
                 iri_record = IRIRecordService.status()
                 urd_record = URDRecordService.status()
-            except psycopg2.OperationalError:
+            except OperationalError:
                 Logger.critical(f'could not connect to database server: Connection timed out!, after {LISTEN_DATABASE_TIME_SLEEP}s will retry')
                 time.sleep(LISTEN_DATABASE_TIME_SLEEP)
                 continue

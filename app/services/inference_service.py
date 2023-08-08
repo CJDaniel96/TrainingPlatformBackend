@@ -527,6 +527,10 @@ class YOLOFanoGANInference(YOLOInference):
     def zj_wlcsp567l_condition(self, class_names, target):
         if target not in class_names:
             return False
+        elif 'shift' in class_names:
+            return False
+        elif 'broken' in class_names:
+            return False
         return True
     
     def zj_xtal_condition(self, class_names, target):

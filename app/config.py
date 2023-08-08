@@ -145,6 +145,9 @@ VALIDATION_FLOW = {
         'NK_DAOI_CHIPRC_2': {
             'confidence': 0.5, 
             'gan_settings':{
+                'img_size': 256,
+                'latent_dim': 100,
+                'channels': 3,
                 'kappa': 1.0, 
                 'anormaly_threshold': 0.2
             }
@@ -152,6 +155,9 @@ VALIDATION_FLOW = {
         'ZJ_SAW': {
             'confidence': 0.5, 
             'gan_settings':{
+                'img_size': 128,
+                'latent_dim': 100,
+                'channels': 3,
                 'kappa': 1.0, 
                 'anormaly_threshold': 0.1
             }
@@ -159,6 +165,9 @@ VALIDATION_FLOW = {
         'ZJ_WLCSP567L': {
             'confidence': 0, 
             'gan_settings':{
+                'img_size': 128,
+                'latent_dim': 100,
+                'channels': 3,
                 'kappa': 1.0, 
                 'anormaly_threshold': 0.22
             }
