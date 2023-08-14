@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 from torchvision import datasets, models, transforms
-from app.config import MOBILENET_TRAIN_MODEL_DIR, MOBILENETV2_BATCH_SIZE, MOBILENETV2_EPOCHS, YOLOV5_BATCH_SIZE, YOLOV5_DIR, YOLOV5_EPOCHS, YOLO_TRAIN_MODEL_DIR
+from app.config import MOBILENET_TRAIN_MODEL_DIR, MOBILENETV2_BATCH_SIZE, MOBILENETV2_EPOCHS, YOLOV5_BATCH_SIZE, YOLOV5_DIR, YOLOV5_EPOCHS, YOLO_TRAIN_MODEL_DIR, YOLOV5_SEED, YOLOV5S_WEIGHT
 from app.mobilenet_v2.train import run as mobilenet_run
 from app.yolov5.train import run as yolo_run
 
@@ -37,7 +37,7 @@ class YOLOTrain:
     @classmethod
     def train_model(cls, project, task_name, data, cfg, hyp=os.path.join(YOLOV5_DIR, 'data', 'hyps', 'hyp.scratch-low.yaml')):
         save_result_dir = os.path.join(YOLO_TRAIN_MODEL_DIR, project)
-        yolo_run(batch_size=YOLOV5_BATCH_SIZE, epochs=YOLOV5_EPOCHS, data=data, cfg=cfg, hyp=hyp, project=save_result_dir, name=task_name)
+        yolo_run(weights=YOLOV5S_WEIGHT, atch_size=YOLOV5_BATCH_SIZE, epochs=YOLOV5_EPOCHS, data=data, cfg=cfg, hyp=hyp, seed=YOLOV5_SEED, project=save_result_dir, name=task_name)
 
 
 class MobileNetV2Train:

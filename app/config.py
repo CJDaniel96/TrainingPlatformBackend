@@ -118,6 +118,10 @@ YOLOV5_BATCH_SIZE = 8
 
 YOLOV5_EPOCHS = 300
 
+YOLOV5S_WEIGHT = 'app/yolov5/yolov5s.pt'
+
+YOLOV5_SEED = 42
+
 # Training Flow Settings
 # Only Selection as Following
 # 1. object_detection
