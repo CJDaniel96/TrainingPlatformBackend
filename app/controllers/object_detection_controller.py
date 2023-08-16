@@ -50,17 +50,14 @@ class ObjectDetectionController:
         return ObjectDetectionTrainDataProcessing.get_models_yaml(project)
     
     @classmethod
-    def get_hyps_yaml(cls, project):
-        return ObjectDetectionTrainDataProcessing.get_hyps_yaml(project)
-    
-    @classmethod
     def train(cls, project, task_name, data, cfg):
         Logger.info('YOLO Training Start...')
         if project in YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT:
-            hyp = cls().get_hyps_yaml(project)
+            hyp = ObjectDetectionTrainDataProcessing.get_random_crop_close_hyp_yaml()
             YOLOTrain.train_model(project, task_name, data, cfg, hyp)
         else:
-            YOLOTrain.train_model(project, task_name, data, cfg)
+            hyp = ObjectDetectionTrainDataProcessing.get_default_hyp_yaml()
+            YOLOTrain.train_model(project, task_name, data, cfg, hyp)
 
     @classmethod
     def validate(cls, project, task_name):

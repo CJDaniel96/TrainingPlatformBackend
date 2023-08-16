@@ -64,7 +64,14 @@ PROJECTS = [
     'ZJ_WLCSP567L', 
     # HZ Site
     'HZ_CHIPRC', 
-    'HZ_PCIE'
+    'HZ_PCIE', 
+    # JQ Site
+    'JQ_4PINS', 
+    'JQ_CHIPRC', 
+    'JQ_ICBGA', 
+    'JQ_LXX', 
+    'JQ_NEFANG', 
+    'JQ_XTAL'
 ]
 
 # Model Folder Path
@@ -125,7 +132,8 @@ YOLOV5_SEED = 42
 YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT = [
     'NK_DAOI_CHIPRC_2',
     'ZJ_CHIPRC',
-    'HZ_CHIPRC'
+    'HZ_CHIPRC', 
+    'JQ_CHIPRC'
 ]
 
 # Training Flow Settings
@@ -145,7 +153,14 @@ TRAINING_FLOW = {
     'ZJ_WLCSP567L': ['object_detection'], 
     # HZ Site
     'HZ_CHIPRC': ['object_detection'], 
-    'HZ_PCIE': ['object_detection']
+    'HZ_PCIE': ['object_detection'],
+    # JQ Site
+    'JQ_4PINS': ['object_detection'], 
+    'JQ_CHIPRC': ['object_detection'], 
+    'JQ_ICBGA': ['object_detection'], 
+    'JQ_LXX': ['object_detection'], 
+    'JQ_NEFANG': ['object_detection'], 
+    'JQ_XTAL': ['object_detection']
 }
 
 # Validation Flow Settings

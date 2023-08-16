@@ -238,8 +238,12 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
         return os.path.join(YOLO_TRAIN_MODELS_YAML_DIR, project + '.yaml')
     
     @classmethod
-    def get_hyps_yaml(cls, project):
-        return os.path.join(YOLO_TRAIN_HYPS_YAML_DIR, project + '.yaml')
+    def get_default_hyp_yaml(cls):
+        return os.path.join(YOLO_TRAIN_HYPS_YAML_DIR, 'hyp.scratch-low.yaml')
+
+    @classmethod
+    def get_random_crop_close_hyp_yaml(cls):
+        return os.path.join(YOLO_TRAIN_HYPS_YAML_DIR, 'hyp.random-crop-close.yaml')
     
 
 class ClassificationTrainDataProcessing(TrainDataProcessing):
