@@ -122,6 +122,12 @@ YOLOV5S_WEIGHT = 'app/yolov5/yolov5s.pt'
 
 YOLOV5_SEED = 42
 
+YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT = [
+    'NK_DAOI_CHIPRC_2',
+    'ZJ_CHIPRC',
+    'HZ_CHIPRC'
+]
+
 # Training Flow Settings
 # Only Selection as Following
 # 1. object_detection
