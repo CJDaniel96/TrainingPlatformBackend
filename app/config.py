@@ -69,7 +69,7 @@ PROJECTS = [
     'JQ_4PINS', 
     'JQ_CHIPRC', 
     'JQ_ICBGA', 
-    'JQ_LXX', 
+    'JQ_FILTER', 
     'JQ_NEFANG', 
     'JQ_XTAL'
 ]
@@ -158,7 +158,7 @@ TRAINING_FLOW = {
     'JQ_4PINS': ['object_detection'], 
     'JQ_CHIPRC': ['object_detection'], 
     'JQ_ICBGA': ['object_detection'], 
-    'JQ_LXX': ['object_detection'], 
+    'JQ_FILTER': ['object_detection'], 
     'JQ_NEFANG': ['object_detection'], 
     'JQ_XTAL': ['object_detection']
 }
@@ -203,7 +203,13 @@ VALIDATION_FLOW = {
             'confidence': 0.5
         },
         'ZJ_CHIPRC': {},
-        'ZJ_XTAL': {}
+        'ZJ_XTAL': {}, 
+        'JQ_4PINS': {}, 
+        'JQ_CHIPRC': {}, 
+        'JQ_ICBGA': {}, 
+        'JQ_FILTER': {}, 
+        'JQ_NEFANG': {}, 
+        'JQ_XTAL': {}
     },
     'mobilenetv2': {
 
