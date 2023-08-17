@@ -3,7 +3,7 @@ import json
 import os
 import random
 import uuid
-from app.config import IRI_RECORD_STATUS, SITE, SMART_FILTER_NUMBER, URD_RECORD_STATUS
+from app.config import IMAGES_ASSIGN_LIGHT_TYPE, IRI_RECORD_STATUS, SITE, SMART_FILTER_NUMBER, URD_RECORD_STATUS
 from app.services.logging_service import Logger
 from data.config import DATABASES
 from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CategoryMapping, CriticalNg, CropCategorizingRecord, ImagePool, IriRecord, ODTrainingInfo, UploadData, UrdRecord
@@ -202,6 +202,37 @@ class ImagePoolService:
 class ImageDataService(ImagePoolService):
     def __init__(self) -> None:
         super().__init__()
+
+    @classmethod
+    def check_assign_image_light_type(cls, site, group_type):
+        if group_type in IMAGES_ASSIGN_LIGHT_TYPE[site]:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def get_image_by_assign_light_type(cls, site, line, group_type, start_date, end_date, smart_filter=False, is_covered=True, ai_result='0'):
+        Logger.info('Get Images UUID by assign light type from query data')
+        images = {}
+        with create_session(AMR_INFO) as session:
+            end_date += timedelta(days=1)
+            for each_line in eval(line):
+                data = session.query(AmrRawData.image_path).filter(
+                    AmrRawData.site == site,
+                    AmrRawData.line_id == each_line,
+                    AmrRawData.image_name.like(f'%{IMAGES_ASSIGN_LIGHT_TYPE[site][group_type]}%'),
+                    AmrRawData.group_type == group_type,
+                    AmrRawData.create_time.between(start_date, end_date),
+                    AmrRawData.is_covered == is_covered,
+                    AmrRawData.ai_result == ai_result
+                ).all()
+
+                images[each_line] = [each_line + '/' + obj.image_path for obj in data]
+
+            if smart_filter:
+                images = cls().smart_filter_images(images)
+
+            return images
 
     @classmethod
     def get_images(cls, site, line, group_type, start_date, end_date, smart_filter=False, is_covered=True, ai_result='0'):

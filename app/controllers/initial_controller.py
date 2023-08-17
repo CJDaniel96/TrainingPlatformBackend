@@ -9,7 +9,10 @@ class InitialController:
 
     @classmethod
     def get_query_data(cls, site, line, group_type, start_date, end_date, smart_filter):
-        return ImageDataService.get_images(site, line, group_type, start_date, end_date, smart_filter)
+        if ImageDataService.check_assign_image_light_type(site, group_type):
+            return ImageDataService.get_image_by_assign_light_type(site, line, group_type, start_date, end_date, smart_filter)
+        else:
+            return ImageDataService.get_images(site, line, group_type, start_date, end_date, smart_filter)
     
     @classmethod
     def get_upload_data(cls, uuids):

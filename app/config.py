@@ -136,6 +136,16 @@ YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT = [
     'JQ_CHIPRC'
 ]
 
+# Images Assign Light Type Settings
+IMAGES_ASSIGN_LIGHT_TYPE = {
+    'ZJ': {
+        'ChipRC': 'side',
+        'XTAL': 'side', 
+        'SAW': 'side', 
+        'WLCSP567L': 'top'
+    }
+}
+
 # Training Flow Settings
 # Only Selection as Following
 # 1. object_detection

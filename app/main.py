@@ -96,7 +96,7 @@ def app_run():
             if tasks:
                 for id, name in tasks:
                     task_zip_file = CVATController.download(id, name, cvat_cookie)
-                    train_data_folder = ObjectDetectionController.get_train_dataset(task_zip_file, project, task_name)
+                    ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
             ObjectDetectionController.merge_basicline_dataset(train_data_folder, project)
 
             Listener.update_record_object_detection_training_status(tablename, id, TRAINING_STATUS['RUNNING'])
