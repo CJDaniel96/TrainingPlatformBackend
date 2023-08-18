@@ -686,6 +686,30 @@ class YOLOFanoGANInference(YOLOInference):
             return False
 
     @classmethod
+    def jq_sot_condition(self, class_names, target):
+        if len(class_names) == 2 and 'BODY' in class_names:
+            if target in class_names:
+                return True
+            else:
+                return False
+        elif 'MISSINGSOLDER' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'MOVING' in class_names:
+            return False      
+        elif 'BROKEN' in class_names:
+            return False
+        elif 'TOUCH' in class_names:
+            return False          
+        elif 'EMPTY' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        else:
+            return False
+
+    @classmethod
     def yolo_predict(cls, model, image_path, project, chiprc_threshold=0.5):
         result = model(image_path).pandas().xyxy[0]
         class_names = result['name'].unique()
@@ -757,7 +781,12 @@ class YOLOFanoGANInference(YOLOInference):
             target = 'BODY'
             target_df = result[result['name'] == target]
 
-            return cls().zj_xtal_condition(class_names, target)
+            return cls().jq_xtal_condition(class_names, target)
+        
+        elif project == 'JQ_SOT':
+            target = 'POL'
+
+            return cls().jq_sot_condition(class_names, target)
     
     @classmethod
     def vae_predict(cls, image_path, target_df, transform, generator, discriminator, encoder, criterion, kappa=1.0, anormaly_threshold=0.2):

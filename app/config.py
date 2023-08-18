@@ -71,7 +71,8 @@ PROJECTS = [
     'JQ_ICBGA', 
     'JQ_FILTER', 
     'JQ_NEFANG', 
-    'JQ_XTAL'
+    'JQ_XTAL',
+    'JQ_SOT'
 ]
 
 # Model Folder Path
@@ -170,7 +171,8 @@ TRAINING_FLOW = {
     'JQ_ICBGA': ['object_detection'], 
     'JQ_FILTER': ['object_detection'], 
     'JQ_NEFANG': ['object_detection'], 
-    'JQ_XTAL': ['object_detection']
+    'JQ_XTAL': ['object_detection'], 
+    'JQ_SOT': ['object_detection']
 }
 
 # Validation Flow Settings
@@ -219,7 +221,8 @@ VALIDATION_FLOW = {
         'JQ_ICBGA': {}, 
         'JQ_FILTER': {}, 
         'JQ_NEFANG': {}, 
-        'JQ_XTAL': {}
+        'JQ_XTAL': {}, 
+        'JQ_SOT': {}
     },
     'mobilenetv2': {
 
