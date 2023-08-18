@@ -492,8 +492,8 @@ class YOLOFanoGANInference(YOLOInference):
         else:
             return True
         
-    def zj_chiprc_condition(self, class_names):
-        if len(class_names) == 1 and 'Comp' in class_names:
+    def zj_chiprc_condition(self, class_names, target):
+        if len(class_names) == 1 and target in class_names:
             return True
         elif 'Missing' in class_names:
             return False
@@ -548,6 +548,142 @@ class YOLOFanoGANInference(YOLOInference):
             return True
         else:
             return False
+        
+    @classmethod
+    def jq_4pins_condition(self, class_names, target):
+        if len(class_names) == 5 and target in class_names:
+            if 'PADFIT' in class_names:
+                return True
+            else:
+                return False 
+        elif 'MISSINGSOLDER' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'PADSHT' in class_names:
+            return False        
+        elif 'MOVING' in class_names:
+            return False       
+        elif 'TOUCH' in class_names:
+            return False           
+        elif 'EMPTY' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        else:
+            return False
+
+    @classmethod
+    def jq_chiprc_condition(self, class_names, target):
+        if len(class_names) == 1 and target in class_names:
+            return True
+        elif 'MISSING' in class_names:
+            return False
+        elif 'TOUCH' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'TPD' in class_names:
+            return False
+        elif 'MOVING' in class_names:
+            return False
+        elif 'EMPTY' in class_names:
+            return False
+        elif 'INVERSED' in class_names:
+            return False      
+        elif 'BROKEN' in class_names:
+            return False       
+        elif 'GAP' in class_names:
+            if list(class_names).count(target) == 1:
+                return True
+            else:
+                return False
+        elif 'LYTBRI' in class_names:
+            if list(class_names).count(target) == 1:
+                return True
+            else:
+                return False            
+        else:
+            return False
+
+    @classmethod
+    def jq_icbga_condition(self, class_names, target):
+        if len(class_names) == 1 and target in class_names:
+            return True
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'MOVING' in class_names:
+            return False     
+        elif 'MISSINGSOLDER' in class_names:
+            return False
+        elif 'TOUCH' in class_names:
+            return False            
+        elif 'STAN' in class_names:
+            return False
+        elif 'POL' in class_names:
+            if list(class_names).count('BODY') == 1:
+                return True
+            else:
+                return False       
+        else:
+            return False
+
+    @classmethod
+    def jq_filter_condition(self, class_names, target):
+        if len(class_names) == 1 and target in class_names:
+            return True
+        elif 'MISSING' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'MOVING' in class_names:
+            return False        
+        elif 'BROKEN' in class_names:
+            return False
+        elif 'TOUCH' in class_names:
+            if 'METEL' in class_names:
+                return True
+            else:
+                return False            
+        elif 'EMPTY' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        else:
+            return False
+
+    @classmethod
+    def jq_nefang_condition(self, class_names, target):
+        if len(class_names) == 4 and 'ALIGN' in class_names and 'SHIFT' not in class_names:
+            if target in class_names:
+                return True
+            else:
+                return False
+        elif 'CORSHT' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        else:
+            return False
+
+    @classmethod
+    def jq_xtal_condition(self, class_names, target):
+        if 'MISSINGSOLDER' in class_names:
+            return False
+        elif 'EMPTY' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'TOUCH' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        elif len(class_names) == 3 and target in class_names:
+            return True
+        else:
+            return False
 
     @classmethod
     def yolo_predict(cls, model, image_path, project, chiprc_threshold=0.5):
@@ -568,8 +704,9 @@ class YOLOFanoGANInference(YOLOInference):
             return cls().hz_chiprc_condition(target, class_names, result, lcl_chiprc)
         
         elif project == 'ZJ_CHIPRC':
+            target = 'Comp'
 
-            return cls().zj_chiprc_condition(class_names)
+            return cls().zj_chiprc_condition(class_names, target)
         
         elif project == 'ZJ_SAW':
             target = 'SAW_t'
@@ -584,6 +721,39 @@ class YOLOFanoGANInference(YOLOInference):
             return cls().zj_wlcsp567l_condition(class_names, target), target_df
         
         elif project == 'ZJ_XTAL':
+            target = 'BODY'
+            target_df = result[result['name'] == target]
+
+            return cls().zj_xtal_condition(class_names, target)
+        
+        elif project == 'JQ_4PINS':
+            class_names = result['name'].values
+            target = 'BODY'
+
+            return cls().jq_4pins_condition(class_names, target)
+        
+        elif project == 'JQ_CHIPRC':
+            target = 'COMP'
+
+            return cls().jq_chiprc_condition(class_names, target)
+        
+        elif project == 'JQ_ICBGA':
+            target = 'BODY'
+
+            return cls().jq_icbga_condition(class_names, target)
+        
+        elif project == 'JQ_FILTER':
+            target = 'COMP'
+
+            return cls().jq_filter_condition(class_names, target)
+        
+        elif project == 'JQ_NEFANG':
+            class_names = result['name'].values
+            target = 'COR'
+
+            return cls().jq_nefang_condition(class_names, target)
+        
+        elif project == 'JQ_XTAL':
             target = 'BODY'
             target_df = result[result['name'] == target]
 
