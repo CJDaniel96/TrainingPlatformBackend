@@ -205,7 +205,7 @@ class ImageDataService(ImagePoolService):
 
     @classmethod
     def check_assign_image_light_type(cls, site, group_type):
-        if group_type in IMAGES_ASSIGN_LIGHT_TYPE[site]:
+        if site in IMAGES_ASSIGN_LIGHT_TYPE and group_type in IMAGES_ASSIGN_LIGHT_TYPE[site]:
             return True
         else:
             return False
