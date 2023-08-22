@@ -139,15 +139,12 @@ YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT = [
 
 # Images Assign Light Type Settings
 IMAGES_ASSIGN_LIGHT_TYPE = {
-    'NK': {},
-    'HZ': {},
     'ZJ': {
         'ChipRC': 'side',
         'XTAL': 'side', 
         'SAW': 'side', 
         'WLCSP567L': 'top'
-    }, 
-    'JQ': {}
+    }
 }
 
 # Training Flow Settings
