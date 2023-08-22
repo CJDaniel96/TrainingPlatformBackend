@@ -22,7 +22,7 @@ class IRIRecordService:
         with create_session(AI) as session:
             return session.query(IriRecord).filter(
                 IriRecord.status.in_(IRI_RECORD_STATUS)
-            ).order_by(IriRecord.update_time.desc()).first()
+            ).order_by(IriRecord.update_time).first()
 
     @classmethod
     def update_line(cls, id, lines):
@@ -96,7 +96,7 @@ class URDRecordService:
         with create_session(AI) as session:
             return session.query(UrdRecord).filter(
                 UrdRecord.status.in_(URD_RECORD_STATUS)
-            ).order_by(UrdRecord.update_time.desc()).first()
+            ).order_by(UrdRecord.update_time).first()
 
     @classmethod
     def update_line(cls, id, lines):
