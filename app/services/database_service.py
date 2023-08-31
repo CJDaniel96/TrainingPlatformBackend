@@ -3,7 +3,7 @@ import json
 import os
 import random
 import uuid
-from app.config import IMAGES_ASSIGN_LIGHT_TYPE, IRI_RECORD_STATUS, SITE, SMART_FILTER_NUMBER, URD_RECORD_STATUS
+from app.config import IMAGE_POOL_DOWNLOAD_PREFIX, IMAGES_ASSIGN_LIGHT_TYPE, IRI_RECORD_STATUS, SITE, SMART_FILTER_NUMBER, URD_RECORD_STATUS
 from app.services.logging_service import Logger
 from data.config import DATABASES
 from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CategoryMapping, CriticalNg, CropCategorizingRecord, ImagePool, IriRecord, ODTrainingInfo, UploadData, UrdRecord
@@ -250,7 +250,7 @@ class ImageDataService(ImagePoolService):
                     AmrRawData.ai_result == ai_result
                 ).all()
 
-                images[each_line] = [each_line + '/' + obj.image_path for obj in data]
+                images[each_line] = [IMAGE_POOL_DOWNLOAD_PREFIX + '/' + each_line + '/' + obj.image_path for obj in data]
 
             if smart_filter:
                 images = cls().smart_filter_images(images)
@@ -282,9 +282,9 @@ class UploadDataService(ImagePoolService):
             data = session.query(AmrRawData).filter(AmrRawData.uuid.in_(eval(uuids))).all()
             for obj in data:
                 if obj.line_id not in images:
-                    images[obj.line_id] = [obj.line_id + '/' + obj.image_path]
+                    images[obj.line_id] = [IMAGE_POOL_DOWNLOAD_PREFIX + '/' + obj.line_id + '/' + obj.image_path]
                 else:
-                    images[obj.line_id].append(obj.line_id + '/' + obj.image_path)
+                    images[obj.line_id].append(IMAGE_POOL_DOWNLOAD_PREFIX + '/' + obj.line_id + '/' + obj.image_path)
 
             return images
 
@@ -302,9 +302,9 @@ class UploadImageDataService(ImagePoolService):
             image_pool = session.query(ImagePool.prefix).filter(ImagePool.line == line).first()
             for obj in data:
                 if obj.line_id not in images:
-                    images[obj.line_id] = [image_pool.prefix + '/' + obj.image_path]
+                    images[obj.line_id] = [IMAGE_POOL_DOWNLOAD_PREFIX + '/' + image_pool.prefix + '/' + obj.image_path]
                 else:
-                    images[obj.line_id].append(image_pool.prefix + '/' + obj.image_path)
+                    images[obj.line_id].append(IMAGE_POOL_DOWNLOAD_PREFIX + '/' + image_pool.prefix + '/' + obj.image_path)
 
             return images
         

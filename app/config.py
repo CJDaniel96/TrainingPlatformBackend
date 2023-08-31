@@ -23,6 +23,8 @@ IMAGE_POOL_DOWNLOAD_URL = 'http://172.20.20.10:8888/imagesinzip'
 
 IMAGE_POOL_DOWNLOAD_PROXIES = {'http': 'http://172.20.20.10:8888/imagesinzip'}
 
+IMAGE_POOL_DOWNLOAD_PREFIX = 'images'
+
 TRAINING_PLATFORM_RECORD_STATUS = {
     # Init Status
     'INFERENCE_ON_GOING': 'Inference On going',
