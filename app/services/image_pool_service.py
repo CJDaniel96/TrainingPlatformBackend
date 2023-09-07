@@ -1,7 +1,6 @@
 import http
 import os
 import requests
-from app.config import IMAGE_POOL_DOWNLOAD_PROXIES, IMAGE_POOL_DOWNLOAD_URL
 from app.services.logging_service import Logger
 from data.config import ORIGIN_DATASETS_DIR
 
@@ -10,7 +9,9 @@ from data.config import ORIGIN_DATASETS_DIR
 class ImagePool:
     @classmethod
     def download(cls, image_pool, image_list):
-        resp = requests.post(IMAGE_POOL_DOWNLOAD_URL, proxies=IMAGE_POOL_DOWNLOAD_PROXIES, json={
+        download_url = f'http://{image_pool.ip}/imagesinzip'
+        download_proxies = {'http': download_url}
+        resp = requests.post(download_url, proxies=download_proxies, json={
             "paths": image_list
         })
         if resp.status_code == 200:

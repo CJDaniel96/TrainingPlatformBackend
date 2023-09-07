@@ -1,4 +1,4 @@
-from app.config import MOBILENET_TRAIN_MODEL_DIR, TRAINING_FLOW, VALIDATION_FLOW
+from app.config import TRAINING_FLOW, VALIDATION_FLOW
 from app.services.database_service import AIModelInformationService, AIModelPerformanceService, CriticalNGService, CropCategorizingRecordService, IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.datasets_service import ClassificationTrainDataProcessing, UnderkillDataProcessing
 from app.services.inference_service import MobileNetGANInference, YOLOInference

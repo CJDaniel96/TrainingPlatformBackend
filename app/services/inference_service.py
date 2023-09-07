@@ -14,19 +14,19 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from PIL import Image
 from torch.nn import functional as F
-from app.config import CLASSIFICATION_INFERNCE_MODEL_DIR, GAN_INFERENCE_MODEL_DIR, MOBILENET_TRAIN_MODEL_DIR, OBJECT_DETECTION_PCIE_BODY_THRESHOLD, OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES, OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS, OBJECT_DETECTION_PCIE_PART_NUMBER, OBJECT_DETECTION_PCIE_PCIE_THRESHOLD, OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME, OBJECT_DETECTION_PCIE_WAYS, UNDERKILL_RATE, YOLO_INFERENCE_MODEL_DIR, YOLO_TRAIN_MODEL_DIR, YOLOV5_DIR, OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN, OBJECT_DETECTION_PCIE_CLASSIFICATION_STD
+from app.config import MODEL_DIRS, OBJECT_DETECTION_PCIE, UNDERKILL_RATE, YOLOV5
 from data.config import CLASSIFICATION_TRAIN_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_INFERENCE_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR
 
 
 class YOLOInference:
     @classmethod
     def get_config(cls, project, config_name='config.ini'):
-        config_file = os.path.join(YOLO_INFERENCE_MODEL_DIR, project, config_name)
+        config_file = os.path.join(MODEL_DIRS['YOLO_INFERENCE_MODEL_DIR'], project, config_name)
         if os.path.exists(config_file):
             return config_file
         else:
             config_name = '*.ini'
-            config_files = glob(os.path.join(YOLO_INFERENCE_MODEL_DIR, project, config_name))
+            config_files = glob(os.path.join(MODEL_DIRS['YOLO_INFERENCE_MODEL_DIR'], project, config_name))
             if len(config_files) == 1:
                 return config_files[0]
             elif len(config_files) > 1:
@@ -118,7 +118,7 @@ class YOLOInference:
 
     @classmethod
     def get_inference_model_path(cls, project, model_name='yolo_model.pt'):
-        model_file = os.path.join(YOLO_INFERENCE_MODEL_DIR, project, model_name)
+        model_file = os.path.join(MODEL_DIRS['YOLO_INFERENCE_MODEL_DIR'], project, model_name)
         if not os.path.exists(model_file):
             raise Exception('No model file or model file name is not project name (e.x. yolo_model.pt)!')
         else:
@@ -126,7 +126,7 @@ class YOLOInference:
         
     @classmethod
     def get_train_model_path(cls, project, task_name):
-        return os.path.join(YOLO_TRAIN_MODEL_DIR, project, task_name, 'weights', 'best.pt')
+        return os.path.join(MODEL_DIRS['YOLO_TRAIN_MODEL_DIR'], project, task_name, 'weights', 'best.pt')
 
     @classmethod
     def device(self):
@@ -134,7 +134,7 @@ class YOLOInference:
     
     @classmethod
     def load_model(cls, path, conf=0.25):
-        model = torch.hub.load(YOLOV5_DIR, 'custom', path=path, source='local')
+        model = torch.hub.load(YOLOV5['YOLOV5_DIR'], 'custom', path=path, source='local')
         model.conf = conf
         model.cuda()
         return model
@@ -232,15 +232,15 @@ class MobileNetGANInference:
 
     @classmethod
     def get_generator_model_path(cls, project):
-        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'generator')
+        return os.path.join(MODEL_DIRS['GAN_INFERENCE_MODEL_DIR'], project, 'generator')
 
     @classmethod
     def get_discriminator_model_path(cls, project):
-        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'discriminator')
+        return os.path.join(MODEL_DIRS['GAN_INFERENCE_MODEL_DIR'], project, 'discriminator')
     
     @classmethod
     def get_encoder_model_path(cls, project):
-        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'encoder')
+        return os.path.join(MODEL_DIRS['GAN_INFERENCE_MODEL_DIR'], project, 'encoder')
     
     @classmethod
     def get_generator_model(cls, path, img_size=256, latent_dim=100, channels=3):
@@ -280,7 +280,7 @@ class MobileNetGANInference:
 
     @classmethod
     def get_train_model_path(cls, project, task_name):
-        return os.path.join(MOBILENET_TRAIN_MODEL_DIR, project, task_name, 'best.pt')
+        return os.path.join(MODEL_DIRS['MOBILENET_TRAIN_MODEL_DIR'], project, task_name, 'best.pt')
 
     @classmethod
     def get_transform(cls, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
@@ -412,15 +412,15 @@ class YOLOFanoGANInference(YOLOInference):
 
     @classmethod
     def get_generator_model_path(cls, project):
-        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'generator')
+        return os.path.join(MODEL_DIRS['GAN_INFERENCE_MODEL_DIR'], project, 'generator')
 
     @classmethod
     def get_discriminator_model_path(cls, project):
-        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'discriminator')
+        return os.path.join(MODEL_DIRS['GAN_INFERENCE_MODEL_DIR'], project, 'discriminator')
     
     @classmethod
     def get_encoder_model_path(cls, project):
-        return os.path.join(GAN_INFERENCE_MODEL_DIR, project, 'encoder')
+        return os.path.join(MODEL_DIRS['GAN_INFERENCE_MODEL_DIR'], project, 'encoder')
 
     @classmethod
     def get_generator_model(cls, path, img_size=256, latent_dim=100, channels=3):
@@ -546,6 +546,24 @@ class YOLOFanoGANInference(YOLOInference):
             return False
         elif len(class_names) == 3 and target in class_names:
             return True
+        else:
+            return False
+        
+    def zj_mc_condition(self, class_names, target):
+        if len(class_names) == 1 and target in class_names:
+            return True
+        elif 'MISSING' in class_names:
+            return False
+        elif 'TOUCH' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'MOVING' in class_names:
+            return False
+        elif 'Flipover' in class_names:
+            return False
         else:
             return False
         
@@ -750,6 +768,11 @@ class YOLOFanoGANInference(YOLOInference):
 
             return cls().zj_xtal_condition(class_names, target)
         
+        elif project == 'ZJ_MC':
+            target = 'Comp'
+
+            return cls().zj_mc_condition(class_names, target)
+        
         elif project == 'JQ_4PINS':
             class_names = result['name'].values
             target = 'BODY'
@@ -838,11 +861,11 @@ class MobileNetYOLOIForestInference(YOLOInference):
 
     @classmethod
     def get_classification_model_path(cls, project):
-        return os.path.join(CLASSIFICATION_INFERNCE_MODEL_DIR, project, 'classification_model.pt')
+        return os.path.join(MODEL_DIRS['CLASSIFICATION_INFERNCE_MODEL_DIR'], project, 'classification_model.pt')
 
     @classmethod
     def get_pinlocation_model_path(cls, project):
-        return os.path.join(YOLO_INFERENCE_MODEL_DIR, project, OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME)
+        return os.path.join(MODEL_DIRS['YOLO_INFERENCE_MODEL_DIR'], project, OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_PICKLE_MODEL_NAME'])
 
     @classmethod
     def get_classification_model(cls, model_path):
@@ -858,8 +881,8 @@ class MobileNetYOLOIForestInference(YOLOInference):
             transforms.Resize((224, 224)), 
             transforms.ToTensor(), 
             transforms.Normalize(
-                mean=OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN, 
-                std=OBJECT_DETECTION_PCIE_CLASSIFICATION_STD
+                mean=OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_CLASSIFICATION_MEAN'], 
+                std=OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_CLASSIFICATION_STD']
             )
         ])
         # Read image and run prepro
@@ -876,7 +899,7 @@ class MobileNetYOLOIForestInference(YOLOInference):
             outputs = model(inputs)
             outputs = F.softmax(outputs, dim=1)
             _, preds = torch.max(outputs, 1)
-        if OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES[preds[0]] == 'OK':
+        if OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_CLASSIFICATION_CLASS_NAMES'][preds[0]] == 'OK':
             return True
         else:
             return False
@@ -891,29 +914,29 @@ class MobileNetYOLOIForestInference(YOLOInference):
         body_xmax = 0
         body_ymax = 0
 
-        for way in OBJECT_DETECTION_PCIE_WAYS.keys():
+        for way in OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_WAYS'].keys():
             if way in os.path.basename(image_path):
-                img_way = OBJECT_DETECTION_PCIE_WAYS[way]
-        for comp in OBJECT_DETECTION_PCIE_PART_NUMBER.keys():
+                img_way = OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_WAYS'][way]
+        for comp in OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_PART_NUMBER'].keys():
             if comp in os.path.basename(image_path):
-                img_comp = OBJECT_DETECTION_PCIE_PART_NUMBER[comp]
+                img_comp = OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_PART_NUMBER'][comp]
 
         lcl_pcie = []
         lcl_body = []
 
         PCIE = result[result['name'] == 'PCIE']['confidence']
         for i, conf in enumerate(PCIE):
-            if conf < OBJECT_DETECTION_PCIE_PCIE_THRESHOLD:
+            if conf < OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_PCIE_THRESHOLD']:
                 lcl_pcie.append(PCIE.index[i])
         result = result.drop(index=lcl_pcie)
 
         BODY = result[result['name'] == 'BODY']['confidence']
         for i, conf in enumerate(BODY):
-            if conf < OBJECT_DETECTION_PCIE_BODY_THRESHOLD:
+            if conf < OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_BODY_THRESHOLD']:
                 lcl_body.append(BODY.index[i])
         result = result.drop(index=lcl_body)
 
-        for NG_type in OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS:
+        for NG_type in OBJECT_DETECTION_PCIE['OBJECT_DETECTION_PCIE_CLASSIFICATION_NGS']:
             if NG_type in class_names:
                 return False
 

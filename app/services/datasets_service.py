@@ -1,5 +1,5 @@
 import shutil
-from app.config import YOLO_TRAIN_MODEL_DIR
+from app.config import MODEL_DIRS
 from data.config import CLASSIFICATION_BASICLINE_DATASETS_DIR, CLASSIFICATION_TRAIN_DATASETS_DIR, CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, ORIGIN_DATASETS_FOLDER_PROFIX, ORIGIN_DATASETS_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR
 from datetime import datetime
 from glob import glob
@@ -51,7 +51,7 @@ class UnderkillDataProcessing:
     
     @classmethod
     def get_loss(cls, project, task_name):
-        result_csv = os.path.join(YOLO_TRAIN_MODEL_DIR, project, task_name, 'results.csv')
+        result_csv = os.path.join(MODEL_DIRS['YOLO_TRAIN_MODEL_DIR'], project, task_name, 'results.csv')
         result = pd.read_csv(result_csv)
         
         return result.iloc[-1, -4]

@@ -1,4 +1,4 @@
-from app.config import TRAINING_FLOW, VALIDATION_FLOW, YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT
+from app.config import TRAINING_FLOW, VALIDATION_FLOW, YOLOV5
 from app.services.database_service import CategoryMappingService, IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.datasets_service import ObjectDetectionTrainDataProcessing
 from app.services.inference_service import YOLOFanoGANInference, MobileNetYOLOIForestInference, YOLOInference
@@ -52,7 +52,7 @@ class ObjectDetectionController:
     @classmethod
     def train(cls, project, task_name, data, cfg):
         Logger.info('YOLO Training Start...')
-        if project in YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT:
+        if project in YOLOV5['YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT']:
             hyp = ObjectDetectionTrainDataProcessing.get_random_crop_close_hyp_yaml()
             YOLOTrain.train_model(project, task_name, data, cfg, hyp)
         else:

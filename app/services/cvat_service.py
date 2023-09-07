@@ -1,6 +1,6 @@
 import os
 from urllib.parse import quote, urlencode, urljoin
-from app.config import CVAT_ANNOTATION_FORMAT, CVAT_CLASSIFICATION_FORMAT, CVAT_DOWNLOAD_FORMAT, CVAT_LOGIN_API, CVAT_LOGIN_INFORMATION, CVAT_LOGOUT_API, CVAT_TASKS_ANNOTATION_API, CVAT_TASKS_DATA_API, CVAT_TASKS_DATASET_API, CVAT_TASKS_STATUS_API, CVAT_UPLOAD_INFORMATION, CVAT_URL, CVAT_TASKS_API
+from app.config import CVAT
 import requests
 
 from data.config import TMP_DIR
@@ -9,14 +9,14 @@ from data.config import TMP_DIR
 class CVATService:
     @classmethod
     def get_login_cookies(cls):
-        login_api_url = urljoin(CVAT_URL, CVAT_LOGIN_API)
-        response = requests.post(login_api_url, json=CVAT_LOGIN_INFORMATION)
+        login_api_url = urljoin(CVAT['CVAT_URL'], CVAT['CVAT_LOGIN_API'])
+        response = requests.post(login_api_url, json=CVAT['CVAT_LOGIN_INFORMATION'])
 
         return response
     
     @classmethod
     def get_logout(cls):
-        logout_api_url = urljoin(CVAT_URL, CVAT_LOGOUT_API)
+        logout_api_url = urljoin(CVAT['CVAT_URL'], CVAT['CVAT_LOGOUT_API'])
         response = requests.post(logout_api_url)
 
         return response
@@ -43,7 +43,7 @@ class CVATService:
     
     @classmethod
     def create_task(cls, auth_header, task_create_information):
-        tasks_api_url = urljoin(CVAT_URL, CVAT_TASKS_API)
+        tasks_api_url = urljoin(CVAT['CVAT_URL'], CVAT['CVAT_TASKS_API'])
         response = requests.post(tasks_api_url, headers=auth_header, data=task_create_information)
         task_id = response.json()['id']
 
@@ -55,11 +55,11 @@ class CVATService:
 
     @classmethod
     def upload_task_data(cls, task_id, auth_header, task_data):
-        upload_url = urljoin(CVAT_URL, CVAT_TASKS_DATA_API).format(task_id)
-        response = requests.post(upload_url, data=CVAT_UPLOAD_INFORMATION, headers=auth_header, files=task_data)
+        upload_url = urljoin(CVAT['CVAT_URL'], CVAT['CVAT_TASKS_DATA_API']).format(task_id)
+        response = requests.post(upload_url, data=CVAT['CVAT_UPLOAD_INFORMATION'], headers=auth_header, files=task_data)
         response.raise_for_status()
 
-        status_url = urljoin(CVAT_URL, CVAT_TASKS_STATUS_API).format(task_id)
+        status_url = urljoin(CVAT['CVAT_URL'], CVAT['CVAT_TASKS_STATUS_API']).format(task_id)
         while True:
             response = requests.get(status_url, headers=auth_header)
             status = response.json()
@@ -70,12 +70,12 @@ class CVATService:
 
     @classmethod
     def upload_task_annotation(cls, task_id, auth_header, task_annotation):
-        upload_url = urljoin(CVAT_URL, CVAT_TASKS_ANNOTATION_API).format(task_id)
+        upload_url = urljoin(CVAT['CVAT_URL'], CVAT['CVAT_TASKS_ANNOTATION_API']).format(task_id)
         upload_data = {
             'annotation_file': open(task_annotation, 'rb')
         }
         parameters = {
-            'format': CVAT_ANNOTATION_FORMAT
+            'format': CVAT['CVAT_ANNOTATION_FORMAT']
         }
         parameters = urlencode(parameters, quote_via=quote)
         while True:
@@ -87,13 +87,13 @@ class CVATService:
     @classmethod
     def check_task_download_format(cls, task_type):
         if task_type == 'object_detection':
-            return CVAT_DOWNLOAD_FORMAT
+            return CVAT['CVAT_DOWNLOAD_FORMAT']
         elif task_type == 'classification':
-            return CVAT_CLASSIFICATION_FORMAT
+            return CVAT['CVAT_CLASSIFICATION_FORMAT']
 
     @classmethod
-    def task_download(cls, task_id, task_name, auth_header, format=CVAT_DOWNLOAD_FORMAT):
-        download_url = urljoin(CVAT_URL, CVAT_TASKS_DATASET_API).format(task_id)
+    def task_download(cls, task_id, task_name, auth_header, format=CVAT['CVAT_DOWNLOAD_FORMAT']):
+        download_url = urljoin(CVAT['CVAT_URL'], CVAT['CVAT_TASKS_DATASET_API']).format(task_id)
         parameters = {
             'action': 'download', 
             'format': format,

@@ -3,7 +3,7 @@ import json
 import os
 import random
 import uuid
-from app.config import IMAGE_POOL_DOWNLOAD_PREFIX, IMAGES_ASSIGN_LIGHT_TYPE, IRI_RECORD_STATUS, SITE, SMART_FILTER_NUMBER, URD_RECORD_STATUS
+from app.config import IMAGE_POOL_DOWNLOAD_PREFIX, IMAGES_ASSIGN_LIGHT_TYPE, RECORD_STATUSES, SITE, SMART_FILTER_NUMBER
 from app.services.logging_service import Logger
 from data.config import DATABASES
 from data.database.ai import AiModelInfo, AiModelPerf, CLSTrainingInfo, CategoryMapping, CriticalNg, CropCategorizingRecord, ImagePool, IriRecord, ODTrainingInfo, UploadData, UrdRecord
@@ -11,22 +11,22 @@ from data.database.amr_info import AmrRawData
 from data.database.sessions import create_session
 
 
-AI = DATABASES['ai']['DATABASE']
-AMR_INFO = DATABASES['amr_info']['DATABASE']
-CVAT = DATABASES['cvat']['DATABASE']
+AI_DATABASE = DATABASES['ai']['DATABASE']
+AMR_INFO_DATABASE = DATABASES['amr_info']['DATABASE']
+CVAT_DATABASE = DATABASES['cvat']['DATABASE']
 
 
 class IRIRecordService:
     @classmethod
     def status(cls):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             return session.query(IriRecord).filter(
-                IriRecord.status.in_(IRI_RECORD_STATUS)
+                IriRecord.status.in_(RECORD_STATUSES['IRI'])
             ).order_by(IriRecord.update_time).first()
 
     @classmethod
     def update_line(cls, id, lines):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(IriRecord).filter(IriRecord.id == id).update({
                 'line': repr(lines).replace('\'', '"')
             })
@@ -34,7 +34,7 @@ class IRIRecordService:
 
     @classmethod
     def update_site(cls, id):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(IriRecord).filter(IriRecord.id == id).update({
                 'site': SITE
             })
@@ -42,7 +42,7 @@ class IRIRecordService:
 
     @classmethod
     def update_status(cls, id, status):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(IriRecord).filter(IriRecord.id == id).update({
                 "status": status
             })
@@ -50,7 +50,7 @@ class IRIRecordService:
 
     @classmethod
     def update_task_id(cls, id, task_id):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(IriRecord).filter(IriRecord.id == id).update({
                 "task_id": task_id
             })
@@ -58,7 +58,7 @@ class IRIRecordService:
 
     @classmethod
     def update_task_name(cls, id, task_name):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(IriRecord).filter(IriRecord.id == id).update({
                 "task": task_name
             })
@@ -66,7 +66,7 @@ class IRIRecordService:
 
     @classmethod
     def update_od_training_status(cls, id, od_training_status):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(IriRecord).filter(IriRecord.id == id).update({
                 "od_training": od_training_status
             })
@@ -74,7 +74,7 @@ class IRIRecordService:
 
     @classmethod
     def update_cls_training_status(cls, id, cls_training_status):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(IriRecord).filter(IriRecord.id == id).update({
                 "cls_training": cls_training_status
             })
@@ -82,7 +82,7 @@ class IRIRecordService:
 
     @classmethod
     def get_tasks(cls, tasks_id):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(IriRecord).filter(
                 IriRecord.task_id.in_(tasks_id)
             ).all()
@@ -93,14 +93,14 @@ class IRIRecordService:
 class URDRecordService:
     @classmethod
     def status(cls):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             return session.query(UrdRecord).filter(
-                UrdRecord.status.in_(URD_RECORD_STATUS)
+                UrdRecord.status.in_(RECORD_STATUSES['URD'])
             ).order_by(UrdRecord.update_time).first()
 
     @classmethod
     def update_line(cls, id, lines):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 'line': repr(lines).replace('\'', '"')
             })
@@ -108,7 +108,7 @@ class URDRecordService:
 
     @classmethod
     def update_site(cls, id):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 'site': SITE
             })
@@ -116,7 +116,7 @@ class URDRecordService:
 
     @classmethod
     def update_status(cls, id, status):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 "status": status
             })
@@ -124,7 +124,7 @@ class URDRecordService:
 
     @classmethod
     def update_task_id(cls, id, task_id):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 "task_id": task_id
             })
@@ -132,7 +132,7 @@ class URDRecordService:
 
     @classmethod
     def update_task_name(cls, id, task_name):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 "task": task_name
             })
@@ -140,7 +140,7 @@ class URDRecordService:
 
     @classmethod
     def update_od_training_status(cls, id, od_training_status):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 "od_training": od_training_status
             })
@@ -148,7 +148,7 @@ class URDRecordService:
 
     @classmethod
     def update_cls_training_status(cls, id, cls_training_status):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 "cls_training": cls_training_status
             })
@@ -156,7 +156,7 @@ class URDRecordService:
 
     @classmethod
     def get_tasks(cls, tasks_id):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(UrdRecord).filter(
                 UrdRecord.task_id.in_(tasks_id)
             ).all()
@@ -165,7 +165,7 @@ class URDRecordService:
 
     @classmethod
     def update_category_ready(cls, id):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(UrdRecord).filter(UrdRecord.id == id).update({
                 "category_ready": True
             })
@@ -195,7 +195,7 @@ class ImagePoolService:
 
     @classmethod
     def get_image_pool(cls):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             return session.query(ImagePool).all()
 
 
@@ -214,7 +214,7 @@ class ImageDataService(ImagePoolService):
     def get_image_by_assign_light_type(cls, site, line, group_type, start_date, end_date, smart_filter=False, is_covered=True, ai_result='0'):
         Logger.info('Get Images UUID by assign light type from query data')
         images = {}
-        with create_session(AMR_INFO) as session:
+        with create_session(AMR_INFO_DATABASE) as session:
             end_date += timedelta(days=1)
             for each_line in eval(line):
                 data = session.query(AmrRawData.image_path).filter(
@@ -238,7 +238,7 @@ class ImageDataService(ImagePoolService):
     def get_images(cls, site, line, group_type, start_date, end_date, smart_filter=False, is_covered=True, ai_result='0'):
         Logger.info('Get Images UUID from query data')
         images = {}
-        with create_session(AMR_INFO) as session:
+        with create_session(AMR_INFO_DATABASE) as session:
             end_date += timedelta(days=1)
             for each_line in eval(line):
                 data = session.query(AmrRawData.image_path).filter(
@@ -264,7 +264,7 @@ class ImageDataService(ImagePoolService):
         date = date_time[:4] + '-' + date_time[4:6] + '-' + date_time[6:8]
         image_path = f'{date}/{date_time}/{image_name}'
 
-        with create_session(AMR_INFO) as session:
+        with create_session(AMR_INFO_DATABASE) as session:
             data = session.query(AmrRawData.uuid).filter(AmrRawData.image_path == image_path).first()
 
         return data.uuid
@@ -278,7 +278,7 @@ class UploadDataService(ImagePoolService):
     def get_images(self, uuids):
         Logger.info('Get Images UUID from upload data')
         images = {}
-        with create_session(AMR_INFO) as session:
+        with create_session(AMR_INFO_DATABASE) as session:
             data = session.query(AmrRawData).filter(AmrRawData.uuid.in_(eval(uuids))).all()
             for obj in data:
                 if obj.line_id not in images:
@@ -297,7 +297,7 @@ class UploadImageDataService(ImagePoolService):
     def get_images(self, uuids, line='upload_image'):
         Logger.info('Get Images UUID from upload images data')
         images = {}
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(UploadData).filter(UploadData.uuid.in_(eval(uuids))).all()
             image_pool = session.query(ImagePool.prefix).filter(ImagePool.line == line).first()
             for obj in data:
@@ -315,7 +315,7 @@ class TrainingInfoService:
 
     @classmethod
     def get_object_detection_tasks_id(cls, task_id, comp_type, val_status='APPROVE'):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(ODTrainingInfo).filter(
                 ODTrainingInfo.task_id < task_id,
                 ODTrainingInfo.comp_type == comp_type,
@@ -326,7 +326,7 @@ class TrainingInfoService:
         
     @classmethod
     def get_classification_tasks_id(cls, task_id, comp_type, val_status='APPROVE'):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(CLSTrainingInfo).filter(
                 CLSTrainingInfo.task_id < task_id,
                 CLSTrainingInfo.comp_type == comp_type,
@@ -337,7 +337,7 @@ class TrainingInfoService:
     
     @classmethod
     def get_object_detection_model_version(cls, comp_type, val_status):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(ODTrainingInfo).filter(
                 ODTrainingInfo.comp_type == comp_type,
                 ODTrainingInfo.val_status == val_status
@@ -350,7 +350,7 @@ class TrainingInfoService:
 
     @classmethod
     def get_classification_model_version(cls, comp_type, val_status):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(CLSTrainingInfo).filter(
                 CLSTrainingInfo.comp_type == comp_type,
                 CLSTrainingInfo.val_status == val_status
@@ -363,7 +363,7 @@ class TrainingInfoService:
         
     @classmethod
     def insert_object_detection_result(cls, task_id, comp_type, val_status, model_version): 
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.add(ODTrainingInfo(
                 task_id=task_id,
                 comp_type=comp_type,
@@ -374,7 +374,7 @@ class TrainingInfoService:
 
     @classmethod
     def insert_classification_result(cls, task_id, comp_type, val_status, model_version):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.add(CLSTrainingInfo(
                 task_id=task_id,
                 comp_type=comp_type,
@@ -390,7 +390,7 @@ class CategoryMappingService:
 
     @classmethod
     def get_class_names(cls, site, group_type, project):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(CategoryMapping.labels).filter(
                 CategoryMapping.site == site,
                 CategoryMapping.group_type == group_type,
@@ -403,7 +403,7 @@ class CategoryMappingService:
 
     @classmethod
     def get_class_dict(cls, site, group_type, project):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(CategoryMapping.labels).filter(
                 CategoryMapping.site == site,
                 CategoryMapping.group_type == group_type,
@@ -416,7 +416,7 @@ class CategoryMappingService:
 
     @classmethod
     def get_ok_category(cls, site, group_type, project):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(CategoryMapping.ok_category).filter(
                 CategoryMapping.site == site,
                 CategoryMapping.group_type == group_type,
@@ -435,7 +435,7 @@ class CropCategorizingRecordService:
     @classmethod
     def update_underkill_image(cls, finetune_id, image_id, image_hight, image_wide, finetune_type, categorizing_code='OK', crop_name='ORG', critical_ng=True):
         try:
-            with create_session(AI) as session:
+            with create_session(AI_DATABASE) as session:
                 session.add(CropCategorizingRecord(
                     finetune_id=finetune_id, 
                     img_id=image_id, 
@@ -462,7 +462,7 @@ class CriticalNGService:
     @classmethod
     def get_image_uuid(cls, image, group_type, crop_name='ORG'):
         image_path = f'{group_type}/{crop_name}/{os.path.basename(image)}'
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(CriticalNg.img_id).filter(CriticalNg.image_path == image_path).first()
 
         return data.img_id
@@ -470,7 +470,7 @@ class CriticalNGService:
     @classmethod
     def insert_new_images(cls, group_type, image_path, crop_name='ORG'):
         image_path = f'{group_type}/{crop_name}/{os.path.basename(image_path)}'
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.add(CriticalNg(
                 img_id=uuid.uuid4(), 
                 image_path=image_path, 
@@ -480,7 +480,7 @@ class CriticalNGService:
     
     @classmethod
     def delete_images_by_group_type(cls, group_type):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.query(CriticalNg).filter(CriticalNg.group_type == group_type).delete()
             session.commit()
 
@@ -491,7 +491,7 @@ class AIModelInformationService:
 
     @classmethod
     def update(cls, group_type, model_path, ip_address, finetune_id, finetune_type, verified_status, crop_name='ORG'):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.add(AiModelInfo(
                 model_type=group_type,
                 model_name=crop_name,
@@ -504,7 +504,7 @@ class AIModelInformationService:
 
     @classmethod
     def get_model_id(cls):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             data = session.query(AiModelInfo.model_id).order_by(AiModelInfo.model_id.desc()).first()
 
         return data.model_id
@@ -516,7 +516,7 @@ class AIModelPerformanceService:
 
     @classmethod
     def update(cls, model_id, metrics_result, false_negative_images, false_positive_images):
-        with create_session(AI) as session:
+        with create_session(AI_DATABASE) as session:
             session.add(AiModelPerf(
                 model_id=model_id,
                 metrics_result=json.dumps(metrics_result),
