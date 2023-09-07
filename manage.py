@@ -5,9 +5,9 @@ from app.main import app_run
 from app.services.logging_service import Logger
 
 
-def insert_validated_images_to_db(project, group_type):
+def insert_validated_images_to_db(project, group_type, image_type):
     Logger.info('Insert Validated Images To Database')
-    ManageController.insert_validated_images_to_db(project, group_type)
+    ManageController.insert_validated_images_to_db(project, group_type, image_type)
 
 def checkenv():
     Logger.info('Check Datasets Environment')
@@ -26,6 +26,7 @@ def parse_opt():
     parser.add_argument('command', choices=['runserver', 'checkenv', 'insertvalimgs'], help='the command to run')
     parser.add_argument('--project', type=str, default='', help='provide project to insert validated images')
     parser.add_argument('--group-type', type=str, default='', help='provide group type to insert validated images')
+    parser.add_argument('--image-type', type=str, default='jpg', help='provide image type to insert validated images')
     opt = parser.parse_args()
 
     return opt
@@ -37,4 +38,4 @@ if __name__ == '__main__':
     elif opt.command == 'checkenv':
         checkenv()
     elif opt.command == 'insertvalimgs':
-        insert_validated_images_to_db(opt.project, opt.group_type)
+        insert_validated_images_to_db(opt.project, opt.group_type, opt.image_type)
