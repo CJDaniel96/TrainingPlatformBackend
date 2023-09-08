@@ -250,7 +250,7 @@ class ImageDataService(ImagePoolService):
                     AmrRawData.ai_result == ai_result
                 ).all()
 
-                images[each_line] = [IMAGE_POOL_DOWNLOAD_PREFIX + '/' + each_line + '/' + obj.image_path for obj in data]
+                images[each_line] = [each_line + '/' + obj.image_path for obj in data]
 
             if smart_filter:
                 images = cls().smart_filter_images(images)

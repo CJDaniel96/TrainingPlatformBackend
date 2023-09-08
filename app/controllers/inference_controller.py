@@ -30,10 +30,10 @@ class YOLOInferenceController(InferenceController):
             if os.path.isfile(data):
                 images = glob(data)
             elif os.path.isdir(data):
-                if glob(os.path.join(data, '*.jpg')):
-                    images = glob(os.path.join(data, '*.jpg'))
-                elif glob(os.path.join(data, '*.jpeg')):
-                    images = glob(os.path.join(data, '*.jpeg'))
+                if glob(os.path.join(data, '**', '*.jpg'), recursive=True):
+                    images = glob(os.path.join(data, '**', '*.jpg'), recursive=True)
+                elif glob(os.path.join(data, '**', '*.jpeg'), recursive=True):
+                    images = glob(os.path.join(data, '**', '*.jpeg'), recursive=True)
 
             for image_path in images:
                 result = YOLOInference.predict(model, image_path)
