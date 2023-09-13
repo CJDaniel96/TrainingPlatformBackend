@@ -94,8 +94,8 @@ def app_run():
             
             tasks = ObjectDetectionController.get_object_detection_tasks(task_id, group_type, tablename)
             if tasks:
-                for id, name in tasks:
-                    task_zip_file = CVATController.download(id, name, cvat_cookie)
+                for each_id, each_name in tasks:
+                    task_zip_file = CVATController.download(each_id, each_name, cvat_cookie)
                     ObjectDetectionController.get_train_dataset(task_zip_file, train_data_folder)
             ObjectDetectionController.merge_basicline_dataset(train_data_folder, project)
 
