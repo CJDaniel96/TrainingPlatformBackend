@@ -510,19 +510,25 @@ class YOLOFanoGANInference(YOLOInference):
         else:
             return False
         
-    def zj_saw_condition(self, class_names, result):
-        if 'Shift' in class_names:
-            return False
+    def zj_saw_condition(self, class_names):
+        if len(class_names) == 3 and 'SAW_s' in class_names:
+            if '5bar_s' in class_names:
+                if '3bar_s' in class_names:
+                    return True
+                else:
+                    return False
+            else:
+                return False
         elif 'Missing' in class_names:
             return False
+        elif 'ChipRC' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        elif 'Shift' in class_names:
+            return False
         else:
-            cnt_saw = result[result['name']=='SAW_t'].shape[0]
-            cnt_3bar_t = result[result['name']=='3bar_t'].shape[0]
-            cnt_5bar_t = result[result['name']=='5bar_t'].shape[0]
-            if (cnt_saw != 1) or (cnt_3bar_t != 1) or (cnt_5bar_t != 1):
-                return False
-        
-        return True
+            return False
     
     def zj_wlcsp567l_condition(self, class_names, target):
         if target not in class_names:
@@ -754,13 +760,13 @@ class YOLOFanoGANInference(YOLOInference):
             target = 'SAW_t'
             target_df = result[result['name'] == target]
 
-            return cls().zj_saw_condition(class_names, result), target_df
+            return cls().zj_saw_condition(class_names)
         
         elif project == 'ZJ_WLCSP567L':
             target = 'BGA'
             target_df = result[result['name'] == target]
 
-            return cls().zj_wlcsp567l_condition(class_names, target), target_df
+            return cls().zj_wlcsp567l_condition(class_names, target)
         
         elif project == 'ZJ_XTAL':
             target = 'BODY'
