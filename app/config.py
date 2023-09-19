@@ -149,26 +149,6 @@ VALIDATION_FLOW = {
                 'kappa': 1.0, 
                 'anormaly_threshold': 0.2
             }
-        }, 
-        'ZJ_SAW': {
-            'confidence': 0.5, 
-            'gan_settings':{
-                'img_size': 128,
-                'latent_dim': 100,
-                'channels': 3,
-                'kappa': 1.0, 
-                'anormaly_threshold': 0.1
-            }
-        }, 
-        'ZJ_WLCSP567L': {
-            'confidence': 0, 
-            'gan_settings':{
-                'img_size': 128,
-                'latent_dim': 100,
-                'channels': 3,
-                'kappa': 1.0, 
-                'anormaly_threshold': 0.22
-            }
         }
     },
     'yolo': {
@@ -176,6 +156,8 @@ VALIDATION_FLOW = {
             'confidence': 0.5
         },
         'ZJ_CHIPRC': {},
+        'ZJ_SAW': {},
+        'ZJ_WLCSP567L': {},
         'ZJ_XTAL': {}, 
         'ZJ_MC': {}, 
         'JQ_4PINS': {}, 
