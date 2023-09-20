@@ -149,6 +149,16 @@ VALIDATION_FLOW = {
                 'kappa': 1.0, 
                 'anormaly_threshold': 0.2
             }
+        }, 
+        'ZJ_WLCSP567L': {
+            'confidence': 0, 
+            'gan_settings':{
+                'img_size': 128,
+                'latent_dim': 100,
+                'channels': 3,
+                'kappa': 1.0, 
+                'anormaly_threshold': 0.22
+            }
         }
     },
     'yolo': {
