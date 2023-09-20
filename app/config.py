@@ -167,7 +167,6 @@ VALIDATION_FLOW = {
         },
         'ZJ_CHIPRC': {},
         'ZJ_SAW': {},
-        'ZJ_WLCSP567L': {},
         'ZJ_XTAL': {}, 
         'ZJ_MC': {}, 
         'JQ_4PINS': {}, 
