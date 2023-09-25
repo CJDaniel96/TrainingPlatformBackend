@@ -118,7 +118,7 @@ TRAINING_FLOW = {
     'NK_PCIE_2': ['object_detection'], 
     # ZJ Site
     'ZJ_CHIPRC': ['object_detection'],
-    'ZJ_IC': ['classification'], 
+    'ZJ_IC': ['object_detection'], 
     'ZJ_XTAL': ['object_detection'], 
     'ZJ_SAW': ['object_detection'], 
     'ZJ_WLCSP567L': ['object_detection'], 
@@ -168,6 +168,7 @@ VALIDATION_FLOW = {
         'ZJ_CHIPRC': {},
         'ZJ_SAW': {},
         'ZJ_XTAL': {}, 
+        'ZJ_IC': {}, 
         'ZJ_MC': {}, 
         'JQ_4PINS': {}, 
         'JQ_CHIPRC': {}, 
@@ -181,15 +182,15 @@ VALIDATION_FLOW = {
 
     },
     'mobilenetv2_fanogan': {
-        'ZJ_IC': {
-            'confidence': 0, 
-            'mean': [0.3248, 0.3176, 0.3038],
-            'std': [0.2565, 0.2558, 0.2521], 
-            'gan_settings':{
-                'kappa': 1.0, 
-                'anormaly_threshold': 0.2334
-            }
-        }
+        # 'ZJ_IC': {
+        #     'confidence': 0, 
+        #     'mean': [0.3248, 0.3176, 0.3038],
+        #     'std': [0.2565, 0.2558, 0.2521], 
+        #     'gan_settings':{
+        #         'kappa': 1.0, 
+        #         'anormaly_threshold': 0.2334
+        #     }
+        # }
     }, 
     'mobilenetv2_yolo_iforest': {
         'NK_PCIE_2', 
