@@ -24,6 +24,9 @@ class YOLOInferenceController(InferenceController):
         if 'object_detection' in TRAINING_FLOW[project]: 
             org_data_folder = os.path.dirname(data)
             model_file = YOLOInference.get_inference_model_path(project)
+            if not model_file:
+                Logger.warn('No model file or model file name is not project name (e.x. yolo_model.pt)!')
+                return
             model = YOLOInference.load_model(model_file)
             xml_folder = YOLOInference.check_folder(os.path.join(org_data_folder, 'xml'))
 

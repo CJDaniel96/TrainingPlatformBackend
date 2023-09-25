@@ -120,7 +120,7 @@ class YOLOInference:
     def get_inference_model_path(cls, project, model_name='yolo_model.pt'):
         model_file = os.path.join(MODEL_DIRS['YOLO_INFERENCE_MODEL_DIR'], project, model_name)
         if not os.path.exists(model_file):
-            raise Exception('No model file or model file name is not project name (e.x. yolo_model.pt)!')
+            return 
         else:
             return model_file
         
@@ -554,6 +554,17 @@ class YOLOFanoGANInference(YOLOInference):
             return True
         else:
             return False
+
+    def zj_ic_condition(self, class_names, target):
+        if len(class_names) == 2:
+            if 'POL_DOWN' in class_names and target in class_names:
+                return True
+            elif 'POL_RIGHT' in class_names and target in class_names:
+                return True
+            else:
+                return False
+        else:
+            return False
         
     def zj_mc_condition(self, class_names, target):
         if len(class_names) == 1 and target in class_names:
@@ -758,7 +769,6 @@ class YOLOFanoGANInference(YOLOInference):
         
         elif project == 'ZJ_SAW':
             target = 'SAW_t'
-            target_df = result[result['name'] == target]
 
             return cls().zj_saw_condition(class_names)
         
@@ -766,13 +776,17 @@ class YOLOFanoGANInference(YOLOInference):
             target = 'BGA'
             target_df = result[result['name'] == target]
 
-            return cls().zj_wlcsp567l_condition(class_names, target)
+            return cls().zj_wlcsp567l_condition(class_names, target), target_df
         
         elif project == 'ZJ_XTAL':
             target = 'BODY'
-            target_df = result[result['name'] == target]
 
             return cls().zj_xtal_condition(class_names, target)
+
+        elif project == 'ZJ_IC':
+            target = 'POL'
+
+            return cls().zj_ic_condition(class_names, target)
         
         elif project == 'ZJ_MC':
             target = 'Comp'
