@@ -3,10 +3,12 @@ from app.config import MODEL_DIRS
 from data.config import CLASSIFICATION_BASICLINE_DATASETS_DIR, CLASSIFICATION_TRAIN_DATASETS_DIR, CLASSIFICATION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_BASICLINE_DATASETS_DIR, OBJECT_DETECTION_TRAIN_DATASETS_DIR, OBJECT_DETECTION_VALIDATION_DATASETS_DIR, OBJECT_DETECTION_UNDERKILL_DATASETS_DIR, CLASSIFICATION_UNDERKILL_DATASETS_DIR, ORIGIN_DATASETS_FOLDER_PROFIX, ORIGIN_DATASETS_DIR, YOLO_TRAIN_DATA_YAML_DIR, YOLO_TRAIN_HYPS_YAML_DIR, YOLO_TRAIN_MODELS_YAML_DIR
 from datetime import datetime
 from glob import glob
+from sklearn.model_selection import train_test_split
 import os
 import zipfile
 import socket
 import pandas as pd
+import numpy as np
 
 
 class UnderkillDataProcessing:
@@ -218,6 +220,26 @@ class ObjectDetectionTrainDataProcessing(TrainDataProcessing):
                 if os.path.exists(os.path.join(train_data_folder, 'labels', 'val')):
                     shutil.rmtree(os.path.join(train_data_folder, 'labels', 'val'))
                 shutil.copytree('\\\\?\\' + os.path.join(basicline_dataset, 'labels', 'val'), '\\\\?\\' + os.path.abspath(os.path.join(train_data_folder, 'labels', 'val')))
+        else:
+            train_folder = []
+            val_images_folder = os.path.join(train_data_folder, 'images', 'val')
+            val_labels_folder = os.path.join(train_data_folder, 'labels', 'val')
+            cls().makedirs(val_images_folder)
+            cls().makedirs(val_labels_folder)
+
+            for image_path in glob(os.path.join(train_images_folder, '*')):
+                label_path = os.path.join(train_labels_folder, os.path.splitext(os.path.basename(image_path))[0] + '.txt')
+                if label_path in glob(os.path.join(train_labels_folder, '*')):
+                    train_folder.append([image_path, label_path])
+            train_array = np.array(train_folder)
+            _, val_images, _, val_labels = train_test_split(train_array[:, 0], train_array[:, 1], test_size=0.2)
+            for val_image, val_label in zip(val_images, val_labels):
+                try:
+                    shutil.move(val_image, os.path.join(train_data_folder, 'images', 'val'))
+                    shutil.move(val_label, os.path.join(train_data_folder, 'labels', 'val'))
+                except FileNotFoundError:
+                    shutil.move('\\\\?\\' + val_image, '\\\\?\\' + os.path.join(train_data_folder, 'images', 'val'))
+                    shutil.move('\\\\?\\' + val_label, '\\\\?\\' + os.path.join(train_data_folder, 'labels', 'val'))
 
     @classmethod
     def write_data_yaml(cls, project, class_names, train_data_folder):
