@@ -202,7 +202,8 @@ VALIDATION_FLOW = {
         'ZJ_POLARITY': {
             'INFERENCE_MODE': 'general',
             'CONFIDENCE': 0.95,
-            'QUERY_IMAGE': 'data/datasets/classification_validation_datasets/ZJ_POLARITY/query_image/golden_sample.jpg'
+            'QUERY_IMAGE_TOP': 'data/datasets/classification_validation_datasets/ZJ_POLARITY/query_image/golden_sample_top.jpg',
+            'QUERY_IMAGE_SIDE': 'data/datasets/classification_validation_datasets/ZJ_POLARITY/query_image/golden_sample_side.jpg'
         }
     }
 }

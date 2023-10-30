@@ -129,7 +129,8 @@ class ClassificationController:
             model = EfficientNetEmbeddingInference.load_model(model_file)
             mean, std = EfficientNetEmbeddingInference.get_mean_std(project, task_name)
             
-            query_image = VALIDATION_FLOW['metric_learning'][project]['QUERY_IMAGE']
+            query_image_top = VALIDATION_FLOW['metric_learning'][project]['QUERY_IMAGE_TOP']
+            query_image_side = VALIDATION_FLOW['metric_learning'][project]['QUERY_IMAGE_SIDE']
             seed = EFFICIENTNETV2_EMBEDDING['SEED']
             validation_images = EfficientNetEmbeddingInference.get_validation_images(project)
             validation_count = EfficientNetEmbeddingInference.check_validation_count(validation_images)
@@ -137,6 +138,10 @@ class ClassificationController:
 
             underkill_count = 0
             for validation_image in validation_images:
+                if '_side' in validation_image:
+                    query_image = query_image_side
+                else:
+                    query_image = query_image_top
                 answer = EfficientNetEmbeddingInference.inference(model, mean, std, validation_image, query_image, seed, confidence)
                 if answer:
                     underkill_count += 1
