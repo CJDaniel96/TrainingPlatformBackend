@@ -25,6 +25,7 @@ class CheckEnvironmentController:
         CheckModelEnvironment.check_classification_inference_models_dir()
         CheckModelEnvironment.check_gan_inference_models_dir()
         CheckModelEnvironment.check_mobilenet_train_models_dir()
+        CheckModelEnvironment.check_metric_learning_train_models_dir()
         CheckModelEnvironment.check_yolo_inference_models_dir()
         CheckModelEnvironment.check_yolo_train_models_dir()
 

@@ -6,7 +6,8 @@ import torch
 import torch.nn as nn
 import cv2
 import numpy as np
-from app.mobilenet_v2.inference import run as mobilenet_inference
+from app.metric_learning.inference import extract_query_features
+from app.metric_learning.utils import read_mean_std, setup_seed
 from app.services.model_service import Discriminator, Encoder, Generator
 from xml.dom.minidom import Document
 from glob import glob
@@ -1010,5 +1011,84 @@ class MobileNetYOLOIForestInference(YOLOInference):
             return True
         elif 'EXPOSURE' in class_names:
             return True
+        else:
+            return True
+
+
+class EfficientNetEmbeddingInference:
+    def __init__(self) -> None:
+        pass
+
+    @classmethod
+    def device(self):
+        return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    @classmethod
+    def get_model_path(cls, project):
+        return os.path.join(MODEL_DIRS['CLASSIFICATION_INFERNCE_MODEL_DIR'], project, 'classification_model.pt')
+    
+    @classmethod
+    def load_model(cls, model_path):
+        return torch.load(model_path, map_location=cls().device())
+
+    @classmethod
+    def get_train_model_path(cls, project, task_name):
+        return os.path.join(MODEL_DIRS['METRIC_LEARNING_TRAIN_MODEL_DIR'], project, task_name, 'best.pt')
+    
+    @classmethod
+    def get_mean_std(cls, project, task_name):
+        mean_std_file = os.path.join(CLASSIFICATION_TRAIN_DATASETS_DIR, project, task_name, 'mean_std.txt')
+        with open(mean_std_file, 'r') as f:
+            mean = eval(re.search('[\[].*[\]]', f.readline())[0])
+            std = eval(re.search('[\[].*[\]]', f.readline())[0])
+
+        return mean, std
+
+    @classmethod
+    def get_validation_images(cls, project):
+        return glob(os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, '**', '*.jpg'), recursive=True) + glob(os.path.join(CLASSIFICATION_VALIDATION_DATASETS_DIR, project, '**', '*.jpeg'), recursive=True)
+    
+    @classmethod
+    def check_validation_count(cls, images):
+        return len(images)
+    
+    @classmethod
+    def check_folder(cls, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        return path
+    
+    @classmethod
+    def get_underkill_folder(cls, project, task_name):
+        dst_folder = os.path.join(CLASSIFICATION_UNDERKILL_DATASETS_DIR, project, task_name)
+        cls().check_folder(dst_folder)
+        
+        return dst_folder
+
+    @classmethod
+    def inference(cls, model, mean, std, image_path, query_image, seed, confidence):
+        setup_seed(seed)
+
+        if os.path.isfile(image_path):
+            query_features = extract_query_features(model, query_image, cls().device(), mean, std)
+            output = extract_query_features(model, image_path, cls().device(), mean, std)
+            score = torch.cosine_similarity(output, query_features)
+
+        if score > confidence:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def output_underkill_image(cls, image_path, underkill_folder):
+        image_name = os.path.basename(image_path)
+        dst_path = os.path.abspath(os.path.join(underkill_folder, image_name))
+        shutil.copyfile(image_path, dst_path)
+        
+    @classmethod
+    def check_validation_result(cls, underkill_count, validation_count):
+        if underkill_count / validation_count > UNDERKILL_RATE:
+            return False
         else:
             return True

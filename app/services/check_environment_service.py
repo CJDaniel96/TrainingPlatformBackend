@@ -174,6 +174,15 @@ class CheckModelEnvironment:
                 Logger.info(f'Create {project} Classification Inference Models Dir')
                 os.makedirs(folder)
 
+    @classmethod
+    def check_metric_learning_train_models_dir(cls):
+        Logger.info('Check Metric Learning Train Models Dir')
+        for project in PROJECTS[SITE]:
+            folder = os.path.join(MODEL_DIRS['METRIC_LEARNING_TRAIN_MODEL_DIR'], project)
+            if not os.path.exists(folder):
+                Logger.info(f'Create {project} Metric Learning Train Models Dir')
+                os.makedirs(folder)
+
 
 class ClearLocalDataset:
     @classmethod
