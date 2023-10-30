@@ -8,8 +8,8 @@ from tqdm import tqdm
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 from pytorch_metric_learning import losses, testers
-from model import EfficientArcFaceModel
-from utils import setup_seed, select_data_transforms, get_mean_std, save_mean_std, save_class_to_idx
+from app.metric_learning.model import EfficientArcFaceModel
+from app.metric_learning.utils import setup_seed, select_data_transforms, get_mean_std, save_mean_std, save_class_to_idx
 
 
 def history_record(opt):

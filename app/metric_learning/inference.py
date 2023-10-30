@@ -14,7 +14,7 @@ from torchvision.utils import make_grid
 from matplotlib import pyplot as plt
 from pytorch_metric_learning.distances import CosineSimilarity
 from pytorch_metric_learning.utils.inference import InferenceModel, MatchFinder, FaissKMeans
-from utils import setup_seed, read_mean_std, select_data_transforms
+from app.metric_learning.utils import setup_seed, read_mean_std, select_data_transforms
 
 
 def imsave(img, mean, std, save_image_folder, title, figsize=(8, 4)):
