@@ -1,9 +1,9 @@
-from app.config import TRAINING_FLOW, VALIDATION_FLOW
+from app.config import EFFICIENTNETV2_EMBEDDING, TRAINING_FLOW, VALIDATION_FLOW
 from app.services.database_service import AIModelInformationService, AIModelPerformanceService, CriticalNGService, CropCategorizingRecordService, IRIRecordService, TrainingInfoService, URDRecordService
 from app.services.datasets_service import ClassificationTrainDataProcessing, UnderkillDataProcessing
-from app.services.inference_service import MobileNetGANInference, YOLOInference
+from app.services.inference_service import EfficientNetEmbeddingInference, MobileNetGANInference, YOLOInference
 from app.services.logging_service import Logger
-from app.services.train_service import MobileNetV2Train
+from app.services.train_service import MetricLearningTrain, MobileNetV2Train
 
 
 class ClassificationController:
@@ -28,7 +28,10 @@ class ClassificationController:
         
     @classmethod
     def get_train_model_path(cls, project, task_name):
-        return MobileNetGANInference.get_train_model_path(project, task_name)
+        if 'metric_learning' in TRAINING_FLOW[project]:
+            return EfficientNetEmbeddingInference.get_train_model_path(project, task_name)
+        else:
+            return MobileNetGANInference.get_train_model_path(project, task_name)
         
     @classmethod
     def get_train_data_folder(cls, project, task_name):
@@ -57,8 +60,12 @@ class ClassificationController:
 
     @classmethod
     def train(cls, project, task_name, data):
-        Logger.info('MobileNet V2 Training Start...')
-        MobileNetV2Train.train_model(project, task_name, data)
+        if 'metric_learning' in TRAINING_FLOW[project]:
+            Logger.info('Metric Learning with EfficientNet V2 Training Start...')
+            MetricLearningTrain.train_model(project, task_name, data)
+        else:
+            Logger.info('MobileNet V2 Training Start...')
+            MobileNetV2Train.train_model(project, task_name, data)
 
     @classmethod
     def validate(cls, project, task_name):
@@ -116,6 +123,26 @@ class ClassificationController:
                     MobileNetGANInference.output_underkill_image(validation_image, underkill_folder)
             
             final_answer = MobileNetGANInference.check_validation_result(underkill_count, validation_count)
+
+        elif project in VALIDATION_FLOW['metric_learning']:
+            model_file = EfficientNetEmbeddingInference.get_train_model_path(project, task_name)
+            model = EfficientNetEmbeddingInference.load_model(model_file)
+            mean, std = EfficientNetEmbeddingInference.get_mean_std(project, task_name)
+            
+            query_image = VALIDATION_FLOW['metric_learning'][project]['QUERY_IMAGE']
+            seed = EFFICIENTNETV2_EMBEDDING['SEED']
+            validation_images = EfficientNetEmbeddingInference.get_validation_images(project)
+            validation_count = EfficientNetEmbeddingInference.check_validation_count(validation_images)
+            underkill_folder = EfficientNetEmbeddingInference.get_underkill_folder(project, task_name)
+
+            underkill_count = 0
+            for validation_image in validation_images:
+                answer = EfficientNetEmbeddingInference.inference(model, mean, std, validation_image, query_image, seed, confidence)
+                if answer:
+                    underkill_count += 1
+                    EfficientNetEmbeddingInference.output_underkill_image(validation_image, underkill_folder)
+            
+            final_answer = EfficientNetEmbeddingInference.check_validation_result(underkill_count, validation_count)
 
     @classmethod
     def get_finetune_type(cls, tablename):

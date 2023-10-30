@@ -49,7 +49,7 @@ TRAINING_STATUS = {
 
 PROJECTS = {
     'TW': ['NK_DAOI_CHIPRC', 'NK_DAOI_CHIPRC_2', 'NK_PCIE_2'],
-    'ZJ': ['ZJ_CHIPRC', 'ZJ_IC', 'ZJ_XTAL', 'ZJ_SAW', 'ZJ_WLCSP567L', 'ZJ_MC'],
+    'ZJ': ['ZJ_CHIPRC', 'ZJ_IC', 'ZJ_XTAL', 'ZJ_SAW', 'ZJ_WLCSP567L', 'ZJ_MC', 'ZJ_POLARITY'],
     'HZ': ['HZ_CHIPRC', 'HZ_PCIE'],
     'JQ': ['JQ_4PINS', 'JQ_CHIPRC', 'JQ_ICBGA', 'JQ_FILTER', 'JQ_NEFANG', 'JQ_XTAL', 'JQ_SOT'],
 }
@@ -57,6 +57,7 @@ PROJECTS = {
 # Model Folder Path
 
 MODEL_DIRS = {
+    'METRIC_LEARNING_TRAIN_MODEL_DIR': './app/models/metric_learning_train',
     'MOBILENET_TRAIN_MODEL_DIR': './app/models/mobilenet_train',
     'YOLO_INFERENCE_MODEL_DIR': './app/models/yolo_inference',
     'YOLO_TRAIN_MODEL_DIR': './app/models/yolo_train',
@@ -123,6 +124,7 @@ TRAINING_FLOW = {
     'ZJ_SAW': ['object_detection'], 
     'ZJ_WLCSP567L': ['object_detection'], 
     'ZJ_MC': ['object_detection'], 
+    'ZJ_POLARITY': ['classification', 'metric_learning'],
     # HZ Site
     'HZ_CHIPRC': ['object_detection'], 
     'HZ_PCIE': ['object_detection'],
@@ -193,8 +195,15 @@ VALIDATION_FLOW = {
         # }
     }, 
     'mobilenetv2_yolo_iforest': {
-        'NK_PCIE_2', 
-        'HZ_PCIE'
+        'NK_PCIE_2': {}, 
+        'HZ_PCIE': {}
+    },
+    'metric_learning': {
+        'ZJ_POLARITY': {
+            'INFERENCE_MODE': 'general',
+            'CONFIDENCE': 0.95,
+            'QUERY_IMAGE': 'data/datasets/classification_validation_datasets/ZJ_POLARITY/query_image/golden_sample.jpg'
+        }
     }
 }
 
@@ -223,4 +232,19 @@ UNDERKILL_RATE = 0.01
 MOBILENETV2 = {
     'BATCH_SIZE': 64,
     'EPOCHS': 40,
+}
+
+# Metric Learning Settings
+
+# EfficientNet V2 Settings
+
+EFFICIENTNETV2_EMBEDDING = {
+    'SEED': 42,
+    'BATCH_SIZE': 64,
+    'EPOCHS': 100,
+    'NUM_CLASSES': 4,
+    'EMBEDDING_SIZE': 512,
+    'LEARING_RATE': 1e-3,
+    'LOSS_LEARING_RATE': 1e-4,
+    'PROJECT': ['ZJ_POLARITY'],
 }
