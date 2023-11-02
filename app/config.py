@@ -49,7 +49,7 @@ TRAINING_STATUS = {
 
 PROJECTS = {
     'TW': ['NK_DAOI_CHIPRC', 'NK_DAOI_CHIPRC_2', 'NK_PCIE_2'],
-    'ZJ': ['ZJ_CHIPRC', 'ZJ_IC', 'ZJ_XTAL', 'ZJ_SAW', 'ZJ_WLCSP567L', 'ZJ_MC', 'ZJ_POLARITY'],
+    'ZJ': ['ZJ_CHIPRC', 'ZJ_IC', 'ZJ_XTAL', 'ZJ_SAW', 'ZJ_WLCSP567L', 'ZJ_MC', 'ZJ_SAW_POLARITY'],
     'HZ': ['HZ_CHIPRC', 'HZ_PCIE'],
     'JQ': ['JQ_4PINS', 'JQ_CHIPRC', 'JQ_ICBGA', 'JQ_FILTER', 'JQ_NEFANG', 'JQ_XTAL', 'JQ_SOT'],
 }
@@ -124,7 +124,7 @@ TRAINING_FLOW = {
     'ZJ_SAW': ['object_detection'], 
     'ZJ_WLCSP567L': ['object_detection'], 
     'ZJ_MC': ['object_detection'], 
-    'ZJ_POLARITY': ['classification', 'metric_learning'],
+    'ZJ_SAW_POLARITY': ['classification', 'metric_learning'],
     # HZ Site
     'HZ_CHIPRC': ['object_detection'], 
     'HZ_PCIE': ['object_detection'],
@@ -199,11 +199,11 @@ VALIDATION_FLOW = {
         'HZ_PCIE': {}
     },
     'metric_learning': {
-        'ZJ_POLARITY': {
+        'ZJ_SAW_POLARITY': {
             'INFERENCE_MODE': 'general',
             'CONFIDENCE': 0.95,
-            'QUERY_IMAGE_TOP': 'data/datasets/classification_validation_datasets/ZJ_POLARITY/query_image/golden_sample_top.jpg',
-            'QUERY_IMAGE_SIDE': 'data/datasets/classification_validation_datasets/ZJ_POLARITY/query_image/golden_sample_side.jpg'
+            'QUERY_IMAGE_TOP': 'data/datasets/classification_validation_datasets/ZJ_SAW_POLARITY/query_image/golden_sample_top.jpg',
+            'QUERY_IMAGE_SIDE': 'data/datasets/classification_validation_datasets/ZJ_SAW_POLARITY/query_image/golden_sample_side.jpg'
         }
     }
 }
@@ -247,5 +247,5 @@ EFFICIENTNETV2_EMBEDDING = {
     'EMBEDDING_SIZE': 512,
     'LEARING_RATE': 1e-3,
     'LOSS_LEARING_RATE': 1e-4,
-    'PROJECT': ['ZJ_POLARITY'],
+    'PROJECT': ['ZJ_SAW_POLARITY'],
 }
