@@ -52,6 +52,7 @@ PROJECTS = {
     'ZJ': ['ZJ_CHIPRC', 'ZJ_IC', 'ZJ_XTAL', 'ZJ_SAW', 'ZJ_WLCSP567L', 'ZJ_MC', 'ZJ_SAW_POLARITY'],
     'HZ': ['HZ_CHIPRC', 'HZ_PCIE'],
     'JQ': ['JQ_4PINS', 'JQ_CHIPRC', 'JQ_ICBGA', 'JQ_FILTER', 'JQ_NEFANG', 'JQ_XTAL', 'JQ_SOT'],
+    'SX': ['SX_CHIPRC']
 }
 
 # Model Folder Path
@@ -94,7 +95,7 @@ YOLOV5 = {
     'YOLOV5_EPOCHS': 300,
     'YOLOV5S_WEIGHT': 'app/yolov5/yolov5s.pt',
     'YOLOV5_SEED': 42,
-    'YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT': ['NK_DAOI_CHIPRC_2', 'ZJ_CHIPRC', 'HZ_CHIPRC', 'JQ_CHIPRC'],
+    'YOLOV5_HYP_RANDOM_CROP_CLOSE_PROJECT': ['NK_DAOI_CHIPRC_2', 'ZJ_CHIPRC', 'HZ_CHIPRC', 'JQ_CHIPRC', 'SX_CHIPRC'],
 }
 
 # Images Assign Light Type Settings
@@ -135,7 +136,9 @@ TRAINING_FLOW = {
     'JQ_FILTER': ['object_detection'], 
     'JQ_NEFANG': ['object_detection'], 
     'JQ_XTAL': ['object_detection'], 
-    'JQ_SOT': ['object_detection']
+    'JQ_SOT': ['object_detection'],
+    # SX Site
+    'SX_CHIPRC': ['object_detection']
 }
 
 # Validation Flow Settings
@@ -178,7 +181,8 @@ VALIDATION_FLOW = {
         'JQ_FILTER': {}, 
         'JQ_NEFANG': {}, 
         'JQ_XTAL': {}, 
-        'JQ_SOT': {}
+        'JQ_SOT': {},
+        'SX_CHIPRC': {}
     },
     'mobilenetv2': {
 

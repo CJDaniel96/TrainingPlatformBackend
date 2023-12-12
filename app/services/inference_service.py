@@ -744,6 +744,41 @@ class YOLOFanoGANInference(YOLOInference):
             return False
         else:
             return False
+        
+    @classmethod
+    def sx_chiprc_condition(self, class_names, target):
+        if len(class_names) == 1 and target in class_names:
+            return True
+        elif 'MISSING' in class_names:
+            return False
+        elif 'TOUCH' in class_names:
+            return False
+        elif 'STAN' in class_names:
+            return False
+        elif 'SHIFT' in class_names:
+            return False
+        elif 'TPD' in class_names:
+            return False
+        elif 'MOVING' in class_names:
+            return False
+        elif 'EMPTY' in class_names:
+            return False
+        elif 'INVERSED' in class_names:
+            return False      
+        elif 'BROKEN' in class_names:
+            return False       
+        elif 'GAP' in class_names:
+            if list(class_names).count(target) == 1:
+                return True
+            else:
+                return False
+        elif 'LYTBRI' in class_names:
+            if list(class_names).count(target) == 1:
+                return True
+            else:
+                return False            
+        else:
+            return False
 
     @classmethod
     def yolo_predict(cls, model, image_path, project, chiprc_threshold=0.5):
@@ -831,6 +866,11 @@ class YOLOFanoGANInference(YOLOInference):
             target = 'POL'
 
             return cls().jq_sot_condition(class_names, target)
+        
+        elif project == 'SX_CHIPRC':
+            target = 'COMP'
+
+            return cls().sx_chiprc_condition(class_names, target)
     
     @classmethod
     def vae_predict(cls, image_path, target_df, transform, generator, discriminator, encoder, criterion, kappa=1.0, anormaly_threshold=0.2):
