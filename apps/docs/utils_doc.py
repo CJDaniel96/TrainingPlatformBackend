@@ -26,7 +26,8 @@ output_xmls_doc = {
                 'image_path': '/Image/Path',
                 'image_size': '(int, int, int)',
                 'defect_name': ['string'],
-                'defect_position': [['float', 'float', 'float', 'float']]
+                'defect_position': [['float', 'float', 'float', 'float']],
+                'confidence': ['string']
             }))
         }
     }

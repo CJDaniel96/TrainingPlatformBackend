@@ -11,8 +11,9 @@ import requests
 import os
 import random
 import shutil
-
-
+import socket
+import cv2
+import pandas as pd
 
 
 load_dotenv()
@@ -26,6 +27,20 @@ API_URL = urljoin(f'http://{FLASK_RUN_HOST}:{FLASK_RUN_PORT}', FLASK_API_PREFIX)
 
     
 class Inference:
+    @classmethod
+    def get_yolov5_loss(cls, project, task_name):
+        result_csv = Path(MODELS_DIR, project, 'train', task_name, 'yolov5', 'results.csv')
+        result = pd.read_csv(result_csv)
+        
+        return result.iloc[-1, -4]
+    
+    @classmethod
+    def get_yolov5_accuracy(cls, underkills_count, project):
+        validate_count = len(sorted(Path(VALIDATION_DATASETS_DIR, project, 'images').glob('*.jp*')))
+        accuracy = (validate_count - underkills_count) / validate_count
+
+        return accuracy
+
     @classmethod
     def yolov5_inference(cls, model, images):
         data = {
@@ -62,7 +77,7 @@ class Inference:
         params = {
             'project': project
         }
-        ok_labels = requests.post(urljoin(API_URL, 'category_mapping/ok_labels'), params=params)
+        ok_labels = requests.post(urljoin(API_URL, 'category/category_mapping/ok_labels'), params=params)
         method = getattr(validation_scripts, project)
         for result in inference_results:
             if method.predict(result, ok_labels):
@@ -91,7 +106,7 @@ class TrainModel:
         else:
             weights = str(Path(YOLOV5_DIR, 'yolov5s.pt'))
             
-        save_dir = Path(MODELS_DIR, project, 'train')
+        save_dir = Path(MODELS_DIR, project, 'train', task_name)
         
         data = {
             'weights': weights,
@@ -102,7 +117,7 @@ class TrainModel:
             'epochs': YOLOV5_EPOCHS, 
             'seed': YOLOV5_SEED, 
             'project': str(save_dir), 
-            'name': task_name
+            'name': 'yolov5'
         }
         
         response = requests.post(urljoin(API_URL, 'models/yolov5/train'), json=data)
@@ -126,10 +141,9 @@ class Monitor:
         self.api_url = API_URL
         self.logger = Logger(name=__name__, level='DEBUG' if FLASK_DEBUG else 'OFF')
     
-    def _inference(self, unzip_data_folder, project, flow) -> None:
+    def _inference(self, unzip_data_folder, project, flow, model) -> None:
         self.logger.info('Model Inference...')
         if TRAINING_FLOW[SITE][project][flow] == 'yolov5':
-            model = str(Path(MODELS_DIR, project, 'inference', 'yolo_model.pt').resolve())
             images = [str(image_path) for image_path in sorted(Path(unzip_data_folder).glob('*.jp[eg]*'))]
             inference_result = Inference.yolov5_inference(model, images)
             status, message = Inference.to_xml(inference_result['data'])
@@ -180,7 +194,7 @@ class Monitor:
     
     def _images_download_format(self, images, smart_filter) -> dict:
         self.logger.info('Format Download Image')
-        response = requests.get(urljoin(API_URL, 'image_pool/info'))
+        response = requests.get(urljoin(API_URL, 'info/image_pool'))
         image_pool_list = response.json().get('data')
         for image_pool in image_pool_list:
             image_pool['images'] = []
@@ -290,7 +304,7 @@ class Monitor:
             'group_type': group_type,
             'project': project
         }
-        response = requests.get(urljoin(API_URL, 'category_mapping/labels'), params=params)
+        response = requests.get(urljoin(API_URL, 'category/category_mapping/labels'), params=params)
         classes = response.json()['data']['labels']
         
         return classes
@@ -310,19 +324,124 @@ class Monitor:
         else:
             return True
         
-
-    def _upload_category_record(self, images_path, group_type):
+    def _get_critical_ngs(self, group_type, project, task_name):
+        underkill_folder = Path(UNDERKILLS_DATASETS_DIR, project, task_name)
         data = {
-            'images_path': images_path,
-            'group_type': group_type
+            'line_id': 'critical_NG',
+            'group_type': group_type,
+            'critical_ng_images': [f'{group_type}/ORG/{image.name}' for image in underkill_folder.glob('*.jp*')]
         }
-        response = requests.post(urljoin(API_URL, 'category_record/upload'), json=data)
+        response = requests.post(urljoin(API_URL, 'category/critical_ng'), json=data)
+        
+        return response.json()['data']['critical_ngs']
+        
+        
+    def _upload_crop_category_record(self, tablename:str, record_id, project, task_name, critical_ngs):
+        crop_img_ids = []
+        for critical_ng in critical_ngs:
+            image_path = Path(UNDERKILLS_DATASETS_DIR, project, task_name, Path(critical_ng['image_path']).name)
+            im = cv2.imread(str(image_path))
+            h, w, c = im.shape
+            data = {
+                'finetune_id': record_id, 
+                'image_id': critical_ng['img_id'], 
+                'image_wide': w, 
+                'image_hight': h, 
+                'finetune_type': tablename.split('_')[0].upper()
+            }
+            
+            response = requests.post(urljoin(API_URL, 'category/crop_category_record'), json=data)
+            crop_img_ids.append(response.json()['data']['crop_img_id'])
+        
+        return crop_img_ids
+        
+    def _upload_od_training_info(self, task_id, comp_type, validate_result):
+        data = {
+            'task_id': task_id,
+            'comp_type': comp_type, 
+            'validate_result': validate_result
+        }
+        response = requests.post(urljoin(API_URL, 'info/od_training_info'), json=data)
+
+        return response.json()['data']['status']
+        
+    def _get_od_training_info_val_status(self, task_id):
+        params = {
+            'task_id': task_id
+        }
+        response = requests.get(urljoin(API_URL, 'info/od_training_info'), params=params)
+
+        return response.json()['data']['val_status']
+    
+    def _get_cls_training_info_val_status(self, task_id):
+        params = {
+            'task_id': task_id
+        }
+        response = requests.get(urljoin(API_URL, 'info/cls_training_info'), params=params)
+        
+        return response.json()['data']['val_status']
+    
+    def _upload_ai_model_information(self, model_path, group_type, val_status, record_id, tablename: str):
+        ip_address = socket.gethostbyname(socket.gethostname())
+        data = {
+            'model_type': group_type,
+            'model_path': model_path,
+            'ip_address': ip_address,
+            'verified_status': val_status,
+            'finetune_id': record_id,
+            'finetune_type': tablename.split('_')[0].upper()
+        }
+        response = requests.post(urljoin(API_URL, 'info/ai_model_info'), json=data)
+        
+        return response.json()['data']['model_id']
+    
+    def _get_trained_model_path(self, project, task_name):
+        task_model_folder = Path(MODELS_DIR, project, 'train', task_name)
+        models = sorted(task_model_folder.glob('*'))
+        for model in models:
+            if model.name == 'yolov5' and task_model_folder.joinpath(model.name, 'weights', 'best.pt').exists():
+                return str(task_model_folder.joinpath(model.name, 'weights', 'best.pt'))
+            elif task_model_folder.joinpath(model.name, 'best.pt').exists():
+                return str(task_model_folder.joinpath(model.name, 'best.pt'))
+            else:
+                return ''
+            
+    def _inference_training_datasets(self, project, task_name, trained_model, flow):
+        inference_training_datasets_path = Path(DOWNLOADS_DATA_DIR, task_name + '_inference')
+        training_images = Path(DOWNLOADS_DATA_DIR, task_name, 'JPEGImages')
+        if training_images.exists():
+            shutil.copytree(str(training_images), str(inference_training_datasets_path), dirs_exist_ok=True)
+            self._inference(str(inference_training_datasets_path), project, flow, trained_model)
+            
+        return str(inference_training_datasets_path), task_name.split('_')[-1] + '_inference'
+
+    def _upload_ai_model_performance(self, model_id, project, task_name, inference_task_id, crop_image_ids): 
+        if 'object_detection' in TRAINING_FLOW[SITE][project]:
+            loss = Inference.get_yolov5_loss(project, task_name)
+            accuracy = Inference.get_yolov5_accuracy(len(crop_image_ids), project)
+        data = {
+            'model_id': model_id,
+            'metrics_result': {
+                'LOSS': loss,
+                'ACCURACY': accuracy,
+                'FALSE_NEGATIVE_NUM': len(crop_image_ids),
+                'FALSE_POSITIVE_NUM': 0,
+                'FINE_TUNE_CONFIRM_TASK_ID': inference_task_id
+            },
+            'false_negative_imgs': {
+                'NUMBER_OF_IMG': len(crop_image_ids),
+                'CROP_IMG_ID_LIST': crop_image_ids
+            },
+            'false_positive_imgs': {
+                'NUMBER_OF_IMG': 0
+            }
+        }
+        response = requests.post(urljoin(API_URL, 'info/ai_model_performance'), json=data)
         
         if response.status_code == 200:
             return True
         else:
             return False
-        
 
     def get_record_status(self) -> dict:
         self.logger.info('Get Record Status')
@@ -351,7 +470,8 @@ class Monitor:
             unzip_data_folder = self._unzip_data(zip_paths, barcode)
         
         if self._update_record(kwargs['__tablename__'], kwargs['id'], status=TRAINING_PLATFORM_RECORD_STATUS['INFERENCE_ON_GOING']):
-            self._inference(unzip_data_folder, project, 'object_detection')
+            model = str(Path(MODELS_DIR, project, 'inference', 'yolo_model.pt').resolve())
+            self._inference(unzip_data_folder, project, 'object_detection', model)
         task_id, task_name = self._upload_cvat(line, group_type, barcode, project_id, unzip_data_folder)
         self._update_record(kwargs['__tablename__'], kwargs['id'], task_id=task_id, task_name=task_name, status=TRAINING_PLATFORM_RECORD_STATUS['UPLOAD_IMAGE_WITH_LOG_FINISH'])
         
@@ -387,16 +507,42 @@ class Monitor:
                 validate_answer = self._validate_underkill_amount(project, task, len(validation_images))
             else:
                 validate_answer = True
-            
+                
+            self.logger.info(self._upload_od_training_info(task_id, kwargs['group_type'], validate_answer))
+            self._update_record(kwargs['__tablename__'], kwargs['id'], status=TRAINING_PLATFORM_RECORD_STATUS['FINISH_FOR_OD'])
             self.logger.info(f'Object Detection Training Model Validation is {validate_answer}')
         
     def cls_initialized(self, project, task, task_id, **kwargs):
-        self.logger.info('OD Initialized')
+        self.logger.info('CLS Initialized')
+        self._update_record(kwargs['__tablename__'], kwargs['id'], status=TRAINING_PLATFORM_RECORD_STATUS['TRIGGER_TRAINING_FOR_CLS'])
+        inference_task_id = None
         if 'classification' in TRAINING_FLOW[SITE][project]:
             ...
+        if 'object_detection' in TRAINING_FLOW[SITE][project]:
+            self.logger.info('Inference Training Datasets')
+            model_path = self._get_trained_model_path(project, task)
+            inference_training_datasets_path, inference_barcode = self._inference_training_datasets(project, task, model_path, 'object_detection')
+            inference_task_id, _ = self._upload_cvat(
+                kwargs['line'], kwargs['group_type'], inference_barcode, kwargs['project_id'], inference_training_datasets_path
+            )
+
+        self.logger.info('Upload Crop Category Record')
+        critical_ngs = self._get_critical_ngs(kwargs['group_type'], project, task)
+        crop_img_ids = self._upload_crop_category_record(kwargs['__tablename__'], kwargs['id'], project, task, critical_ngs)
         
-        
-            
+        self.logger.info('Check Validate Status')
+        od_val_status = self._get_od_training_info_val_status(task_id)
+        cls_val_status = self._get_cls_training_info_val_status(task_id)
+        if od_val_status == 'APPROVE' and cls_val_status == 'APPROVE':
+            val_status = 'APPROVE'
+        else:
+            val_status = 'FAIL'
+        model_path = self._get_trained_model_path(project, task)
+        self.logger.info('Upload AI Model Information')
+        model_id = self._upload_ai_model_information(model_path, kwargs['group_type'], val_status, kwargs['id'], kwargs['__tablename__'])
+        self.logger.info('Upload AI Model Performance')
+        self._upload_ai_model_performance(model_id, project, task, inference_task_id, crop_img_ids)
+        self._update_record(kwargs['__tablename__'], kwargs['id'], status=TRAINING_PLATFORM_RECORD_STATUS['FINISHED'])
         
     def run(self) -> None:
         record:dict = self.get_record_status()

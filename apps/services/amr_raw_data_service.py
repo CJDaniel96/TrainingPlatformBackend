@@ -1,4 +1,3 @@
-
 from flask_restx import marshal_with
 from apps.serializers.amr_raw_data_serializer import *
 from apps.databases.amr import AmrRawData

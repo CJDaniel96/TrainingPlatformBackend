@@ -2,13 +2,14 @@ from apps.controllers.model_controller import *
 from apps.controllers.record_controller import *
 from apps.controllers.amr_raw_data_controller import *
 from apps.controllers.image_pool_controller import *
+from apps.controllers.information_controller import *
 from apps.controllers.utils_controller import *
 from apps.controllers.category_controller import *
 from apps.docs.category_doc import *
 from apps.docs.amr_raw_data_doc import *
 from apps.docs.record_doc import *
 from apps.docs.inference_doc import *
-from apps.docs.image_pool_doc import *
+from apps.docs.information_doc import *
 from apps.docs.utils_doc import *
 from apps.docs.category_doc import *
 
@@ -46,16 +47,26 @@ data_routes = [
     }
 ]
 
-category_mapping_routes = [
+category_routes = [
     {
         'resource': CategoryMappingLabelsController,
-        'urls': '/labels',
+        'urls': '/category_mapping/labels',
         'doc': category_mapping_labels_controller_doc
     },
     {
         'resource': CategoryMappingOKLabelsController,
-        'urls': '/ok_labels',
+        'urls': '/category_mapping/ok_labels',
         'doc': category_mapping_ok_labels_controller_doc
+    },
+    {
+        'resource': CriticalNGController,
+        'urls': '/critical_ng',
+        'doc': critical_ng_controller_doc
+    },
+    {
+        'resource': CropCategoryRecordController,
+        'urls': '/crop_category_record',
+        'doc': crop_category_record_controller_doc
     }
 ]
 
@@ -95,10 +106,30 @@ models_routes = [
     }
 ]
 
-image_pool_routes = [
+info_routes = [
     {
         'resource': ImagePoolInfoController,
-        'urls': '/info',
-        'doc': image_pool_doc
+        'urls': '/image_pool',
+        'doc': image_pool_info_doc
+    },
+    {
+        'resource': ODTrainingInfoController,
+        'urls': '/od_training_info',
+        'doc': training_info_doc
+    },
+    {
+        'resource': CLSTrainingInfoController,
+        'urls': '/cls_training_info',
+        'doc': training_info_doc
+    },
+    {
+        'resource': AIModelInformationController,
+        'urls': '/ai_model_info',
+        'doc': ai_model_info_doc
+    },
+    {
+        'resource': AIModelPerformanceController,
+        'urls': '/ai_model_performance',
+        'doc': ai_model_performance_doc
     }
 ]

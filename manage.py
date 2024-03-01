@@ -4,7 +4,7 @@ from pathlib import Path
 import requests
 import argparse
 
-
+from torchvision.models import MobileNetV2
 def checkenv():
     # Check Models Folder
     for project, _ in TRAINING_FLOW[SITE].items():
@@ -13,8 +13,9 @@ def checkenv():
             
 def runscript():
     monitor = Monitor()
-    record:dict = requests.get('http://localhost:5000/api/v1/status/iri_record', params={'id': 100}).json()
-    monitor.od_initialized(**record['data'])
+    # record:dict = requests.get('http://localhost:5000/api/v1/status/iri_record', params={'id': 100}).json()
+    # monitor.cls_initialized(**record['data'])
+    monitor.run()
 
 def parse_opt():
     parser = argparse.ArgumentParser()

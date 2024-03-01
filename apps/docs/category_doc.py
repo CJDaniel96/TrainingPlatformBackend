@@ -30,3 +30,27 @@ category_record_upload_doc = {
         }
     }
 }
+
+critical_ng_controller_doc = {
+    'post': {
+        'params': None,
+        'payload': {
+            'line_id': fields.String,
+            'group_type': fields.String,
+            'critical_ng_images': fields.List(fields.String)
+        }
+    }
+}
+
+crop_category_record_controller_doc = {
+    'put': {
+        'params': None,
+        'payload': {
+            'finetune_id': fields.String, 
+            'image_id': fields.String, 
+            'image_wide': fields.Integer, 
+            'image_hight': fields.Integer, 
+            'finetune_type': fields.String
+        }
+    }
+}

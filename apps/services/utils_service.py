@@ -114,7 +114,7 @@ class XMLService:
         
         for result in results:
             try:
-                cls()._output_xml(**result)
+                cls()._output_xml(result['image_size'], result['image_path'], result['defect_name'], result['defect_position'])
                 output_list.append({
                     'image_path': result['image_path'],
                     'status': 'success', 
