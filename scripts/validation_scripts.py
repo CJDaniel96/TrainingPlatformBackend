@@ -3,11 +3,11 @@ import numpy as np
 
 class NK_DAOI_CHIPRC_2:
     @classmethod
-    def predict(cls, result, ok_label, chiprc_threshold=0.5): 
+    def predict(cls, result, ok_label): 
         class_names = np.unique(result['defect_name'])
         lcl_chiprc = 0
         for name, score in zip(result['defect_name'], result['confidence']):
-            if name == 'ChipRC' and score > chiprc_threshold:
+            if name == 'ChipRC' and score > 0.5:
                 lcl_chiprc += 1
         chiprc_count = 0
 
@@ -22,3 +22,23 @@ class NK_DAOI_CHIPRC_2:
             return False
         else:
             return True
+        
+class NK_CHIPRC_NA:
+    @classmethod
+    def predict(cls, result):
+        class_names = np.unique(result['defect_name'])
+        
+        if len(class_names) == 0:
+            return 'NG', 'nolabel'
+        elif 'ChipRC' in class_names:
+            return 'NG', 'ChipRC'
+        elif 'STAN_BLACK' in class_names:
+            return 'NG', 'STAN_BLACK'
+        elif 'STAN_SN' in class_names:
+            return 'NG', 'STAN_SN'
+        elif 'OVERLAP' in class_names:
+            return 'NG', 'OVERLAP'
+        elif 'MISSING' in class_names and len(class_names) == 1:
+            return 'OK', 'OK'
+        else:
+            return 'NG', 'else'
