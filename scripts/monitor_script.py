@@ -140,6 +140,7 @@ class Monitor:
     def __init__(self) -> None:
         self.api_url = API_URL
         self.logger = Logger(name=__name__, level='DEBUG' if FLASK_DEBUG else 'OFF')
+        Path(DOWNLOADS_DATA_DIR).mkdir(parents=True, exist_ok=True)
     
     def _inference(self, unzip_data_folder, project, flow, model) -> None:
         self.logger.info('Model Inference...')
