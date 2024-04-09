@@ -141,6 +141,8 @@ class Monitor:
         self.api_url = API_URL
         self.logger = Logger(name=__name__, level='DEBUG' if FLASK_DEBUG else 'OFF')
         Path(DOWNLOADS_DATA_DIR).mkdir(parents=True, exist_ok=True)
+        Path(TRAIN_DATASETS_DIR).mkdir(parents=True, exist_ok=True)
+        Path(UNDERKILLS_DATASETS_DIR).mkdir(parents=True, exist_ok=True)
     
     def _inference(self, unzip_data_folder, project, flow, model) -> None:
         self.logger.info('Model Inference...')
@@ -550,7 +552,6 @@ class Monitor:
     def run(self) -> None:
         record:dict = self.get_record_status()
 
-        if record:
-            for status in RECORD_STATUSES.get(record.get('__tablename__')):    
-                method = getattr(self, status.lower())
-                method(**record)
+        if record.get('status') in RECORD_STATUSES.get(record.get('__tablename__')):   
+            method = getattr(self, record.get('status').lower())
+            method(**record)
