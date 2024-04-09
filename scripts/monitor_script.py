@@ -554,7 +554,7 @@ class Monitor:
             try:
                 record:dict = self.get_record_status()
 
-                if record.get('status') in RECORD_STATUSES.get(record.get('__tablename__')):   
+                if record and record.get('status') in RECORD_STATUSES.get(record.get('__tablename__')):   
                     method = getattr(self, record.get('status').lower())
                     method(**record)
             except Exception as e:
