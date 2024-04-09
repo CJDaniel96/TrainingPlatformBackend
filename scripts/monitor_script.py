@@ -552,4 +552,4 @@ class Monitor:
         if record:
             for status in RECORD_STATUSES.get(record.get('__tablename__')):    
                 method = getattr(self, status.lower())
-                method(**record['data'])
+                method(**record)
