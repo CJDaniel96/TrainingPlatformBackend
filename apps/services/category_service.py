@@ -10,7 +10,7 @@ class CategoryMappingLabelsService:
     @marshal_with(labels_serializer)
     def get_labels(cls, line, group_type, project):
         data = CategoryMapping.query.filter(
-            CategoryMapping.line == line,
+            CategoryMapping.line.in_(line),
             CategoryMapping.group_type == group_type,
             CategoryMapping.project == project
         ).first()
@@ -21,7 +21,7 @@ class CategoryMappingLabelsService:
     @marshal_with(ok_label_serializer)
     def get_ok_labels(cls, line, group_type, project):
         data = CategoryMapping.query.filter(
-            CategoryMapping.line == line,
+            CategoryMapping.line.in_(line),
             CategoryMapping.group_type == group_type,
             CategoryMapping.project == project
         ).first()
