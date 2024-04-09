@@ -75,6 +75,7 @@ ENV_CONFIG = {
 # Training Platform Backend Settings
 
 SITE = 'TW'
+WATCHING_DATABASE_CYCLE_TIME = 600
 
 
 # Record Status

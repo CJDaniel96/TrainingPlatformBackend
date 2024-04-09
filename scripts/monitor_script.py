@@ -14,6 +14,7 @@ import shutil
 import socket
 import cv2
 import pandas as pd
+import time
 
 
 load_dotenv()
@@ -557,6 +558,8 @@ class Monitor:
                 if record and record.get('status') in RECORD_STATUSES.get(record.get('__tablename__')):   
                     method = getattr(self, record.get('status').lower())
                     method(**record)
+                else:
+                    time.sleep(WATCHING_DATABASE_CYCLE_TIME)
             except Exception as e:
                 self.logger.error(e)
                 continue
