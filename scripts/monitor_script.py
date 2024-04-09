@@ -451,15 +451,17 @@ class Monitor:
         iri_record_data = iri_record.get('data')
         urd_record_data = urd_record.get('data')
         
-        if iri_record_data and urd_record_data:
+        if not all(value is None for value in iri_record_data.values()) and not all(value is None for value in urd_record_data.values()):
             if iri_record_data.get('update_time') > urd_record_data.get('update_time'):
                 return urd_record_data
             else:
                 return iri_record_data
-        elif not iri_record_data and urd_record_data:
-            return urd_record_data
-        elif iri_record_data and not urd_record_data:
+        elif not all(value is None for value in iri_record_data.values()) and all(value is None for value in urd_record_data.values()):
             return iri_record_data
+        elif all(value is None for value in iri_record_data.values()) and not all(value is None for value in urd_record_data.values()):
+            return urd_record_data
+        else:
+            return {}
 
     def init(self, project, project_id, image_mode, site, line, group_type, start_date, end_date, smart_filter, **kwargs):
         images = self._get_images(image_mode, site, line, group_type, start_date, end_date, smart_filter, kwargs['images'])
@@ -546,7 +548,8 @@ class Monitor:
         
     def run(self) -> None:
         record:dict = self.get_record_status()
-        
-        for status in RECORD_STATUSES.get(record.get('__tablename__')):    
-            method = getattr(self, status.lower())
-            method(**record['data'])
+
+        if record:
+            for status in RECORD_STATUSES.get(record.get('__tablename__')):    
+                method = getattr(self, status.lower())
+                method(**record['data'])

@@ -46,20 +46,9 @@ ai_model_performance_doc = {
         'params': None,
         'payload': {
             'model_id': fields.Integer,
-            'metrics_result': {
-                'LOSS': fields.Float,
-                'ACCURACY': fields.Float,
-                'FALSE_NEGATIVE_NUM': fields.Integer,
-                'FALSE_POSITIVE_NUM': fields.Integer,
-                'FINE_TUNE_CONFIRM_TASK_ID': fields.String
-            },
-            'false_negative_imgs': {
-                'NUMBER_OF_IMG': fields.Integer,
-                'CROP_IMG_ID_LIST': fields.List(fields.String)
-            },
-            'false_positive_imgs': {
-                'NUMBER_OF_IMG': fields.Integer
-            }
+            'metrics_result': fields.String("{'LOSS': Float, 'ACCURACY': Float, 'FALSE_NEGATIVE_NUM': Integer, 'FALSE_POSITIVE_NUM': Integer, 'FINE_TUNE_CONFIRM_TASK_ID': String}"),
+            'false_negative_imgs': fields.String("{'NUMBER_OF_IMG': Integer, 'CROP_IMG_ID_LIST': List}"),
+            "false_positive_imgs": fields.String("{'NUMBER_OF_IMG': Integer}")
         }
     }
 }
