@@ -550,8 +550,13 @@ class Monitor:
         self._update_record(kwargs['__tablename__'], kwargs['id'], status=TRAINING_PLATFORM_RECORD_STATUS['FINISHED'])
         
     def run(self) -> None:
-        record:dict = self.get_record_status()
+        while True:
+            try:
+                record:dict = self.get_record_status()
 
-        if record.get('status') in RECORD_STATUSES.get(record.get('__tablename__')):   
-            method = getattr(self, record.get('status').lower())
-            method(**record)
+                if record.get('status') in RECORD_STATUSES.get(record.get('__tablename__')):   
+                    method = getattr(self, record.get('status').lower())
+                    method(**record)
+            except Exception as e:
+                self.logger.error(e)
+                continue

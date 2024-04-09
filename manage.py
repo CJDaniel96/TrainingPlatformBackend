@@ -13,8 +13,6 @@ def checkenv():
             
 def runscript():
     monitor = Monitor()
-    # record:dict = requests.get('http://localhost:5000/api/v1/status/iri_record', params={'id': 100}).json()
-    # monitor.cls_initialized(**record['data'])
     monitor.run()
 
 def parse_opt():
