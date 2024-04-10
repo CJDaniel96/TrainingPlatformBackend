@@ -303,12 +303,12 @@ class Monitor:
         return labels_path
         
     def _get_project_classes(self, line, group_type, project):
-        params = {
+        data = {
             'line': line,
             'group_type': group_type,
             'project': project
         }
-        response = requests.post(urljoin(API_URL, 'category/category_mapping/labels'), params=params)
+        response = requests.post(urljoin(API_URL, 'category/category_mapping/labels'), json=data)
         classes = response.json()['data']['labels']
         
         return classes
