@@ -4,7 +4,7 @@ from apps.services.category_service import *
 
 
 class CategoryMappingLabelsController(Resource):
-    def get(self):
+    def post(self):
         json_data = request.get_json()
         
         data = CategoryMappingLabelsService.get_labels(**json_data)
