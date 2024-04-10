@@ -73,12 +73,14 @@ class Inference:
         return inference_results
     
     @classmethod
-    def _yolov5_validate_underkill(cls, project, inference_results):
+    def _yolov5_validate_underkill(cls, line, group_type, project, inference_results):
         underkill_images = []
-        params = {
+        data = {
+            'line': line,
+            'group_type': group_type,
             'project': project
         }
-        ok_labels = requests.post(urljoin(API_URL, 'category/category_mapping/ok_labels'), params=params)
+        ok_labels = requests.post(urljoin(API_URL, 'category/category_mapping/ok_labels'), json=data)
         method = getattr(validation_scripts, project)
         for result in inference_results:
             if method.predict(result, ok_labels):
@@ -87,11 +89,11 @@ class Inference:
         return underkill_images
     
     @classmethod
-    def validate_underkill(cls, algorithm, project, inference_results):
+    def validate_underkill(cls, algorithm, line, group_type, project, inference_results):
         method_name = f'_{algorithm}_validate_underkill'
         if method_name in cls().__dir__():
             method = getattr(cls(), method_name)
-            underkill_images = method(project, inference_results)
+            underkill_images = method(line, group_type, project, inference_results)
             
         return underkill_images
     
@@ -507,7 +509,7 @@ class Monitor:
             self.logger.info('Object Detection Inference')
             validation_images_inference_results = Inference.object_detection_inference(algorithm, trained_model_path, validation_images)
             self.logger.info('Validate underkill')
-            underkill_images = Inference.validate_underkill(algorithm, project, validation_images_inference_results['data']['results'])
+            underkill_images = Inference.validate_underkill(algorithm, kwargs['line'], kwargs['group_type'], project, validation_images_inference_results['data']['results'])
             if underkill_images:
                 self._save_underkill_images(underkill_images, project, task)
                 validate_answer = self._validate_underkill_amount(project, task, len(validation_images))

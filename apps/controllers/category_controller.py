@@ -13,12 +13,10 @@ class CategoryMappingLabelsController(Resource):
     
 
 class CategoryMappingOKLabelsController(Resource):
-    def get(self):
-        project = request.args.get('project')
-        line = request.args.get('line')
-        group_type = request.args.get('group_type')
+    def post(self):
+        json_data = request.get_json()
         
-        data = CategoryMappingLabelsService.get_ok_labels(line, group_type, project)
+        data = CategoryMappingLabelsService.get_ok_labels(**json_data)
         
         return make_response(jsonify({'data': data, 'message': 'Success'}), 200)
     
