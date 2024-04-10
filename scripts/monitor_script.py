@@ -308,7 +308,7 @@ class Monitor:
             'group_type': group_type,
             'project': project
         }
-        response = requests.get(urljoin(API_URL, 'category/category_mapping/labels'), params=params)
+        response = requests.post(urljoin(API_URL, 'category/category_mapping/labels'), params=params)
         classes = response.json()['data']['labels']
         
         return classes
