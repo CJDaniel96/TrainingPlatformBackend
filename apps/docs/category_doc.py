@@ -4,7 +4,7 @@ from flask_restx import fields
 category_mapping_labels_controller_doc = {
     'get': {
         'params': {
-            'line': 'Line',
+            'line': fields.List(fields.String(attribute='Line')),
             'group_type': 'Group Type',
             'project': 'Project'
         },
