@@ -1,0 +1,12 @@
+names:
+  0: ChipRC
+  1: STAN_BLACK
+  2: SOLDER_BALL
+  3: STAN_SN
+  4: OVERLAP
+  5: MISSING
+  6: COOPER
+  7: BRIDGE
+path: D:\Daniel\Project\Code\TrainingPlatformBackend-3\resources\datasets\train\NK_DAOI_CHIPRC_2\CHIP_RC_Dline_20231228180701
+train: images/train
+val: images/val
