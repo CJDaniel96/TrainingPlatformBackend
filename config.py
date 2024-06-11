@@ -215,6 +215,8 @@ CVAT_INFO = {
 
 # Algorithm Settings
 
+OBJECT_DETECTION_ALGORITHM = 'yolov5'
+
 # Yolov5
 
 YOLOV5_DATA_YAML = 'data.yaml'

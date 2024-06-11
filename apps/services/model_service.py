@@ -41,7 +41,7 @@ class TrainingService:
             weights = kwargs['weights']
         else:
             weights = str(Path(YOLOV5_DIR, 'yolov5s.pt'))
-            
+
         if kwargs['data']:
             data = kwargs['data']
         if kwargs['cfg']:
@@ -59,7 +59,12 @@ class TrainingService:
         if kwargs['seed']:
             seed = kwargs['seed']
         
-        yolo_run(weights=weights, data=data, cfg=cfg, hyp=hyp, batch_size=batch_size, epochs=epochs, project=project, name=name, seed=seed, exist_ok=True)
+        if OBJECT_DETECTION_ALGORITHM == 'yolov5':
+            yolo_run(weights=weights, data=data, cfg=cfg, hyp=hyp, batch_size=batch_size, epochs=epochs, project=project, name=name, seed=seed, exist_ok=True)
+        elif OBJECT_DETECTION_ALGORITHM == 'ultralytics_yolov5':
+            from ultralytics import YOLO
+            model = YOLO('yolov5s.yaml')
+            model.train(data=data, hyp=hyp, epochs=epochs, batch_size=batch_size, project=project, name=name, exist_ok=True)
         
         return {
             'best_model_path': str(Path(project, name, 'weights', 'best.pt')),

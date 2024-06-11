@@ -5,7 +5,7 @@ from pathlib import Path
 from urllib.parse import urljoin
 from scripts.cvat_script import CVATScript
 from scripts.yaml_script import Yolov5Yaml
-from scripts import validation_scripts
+from scripts import validation_module
 from scripts.logger import Logger
 import requests
 import os
@@ -81,7 +81,7 @@ class Inference:
             'project': project
         }
         ok_labels = requests.post(urljoin(API_URL, 'category/category_mapping/ok_labels'), json=data)
-        method = getattr(validation_scripts, project)
+        method = getattr(validation_module, project)
         for result in inference_results:
             if method.predict(result, ok_labels):
                 underkill_images.append(result['image_path'])
